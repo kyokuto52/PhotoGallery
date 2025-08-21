@@ -1,0 +1,24 @@
+{
+  "photos": [
+    {
+      "id": 2,
+      "src": "data/example2.jpg",
+      "title": "示例照片2",
+      "description": "另一张示例照片",
+      "tags": [
+        "示例",
+        "建筑"
+      ]
+    },
+    {
+      "id": 1,
+      "src": "data/example1.jpg",
+      "title": "示例照片1",
+      "description": "这是一张示例照片",
+      "tags": [
+        "示例",
+        "风景"
+      ]
+    }
+  ]
+}

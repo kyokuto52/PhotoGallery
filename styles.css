@@ -244,6 +244,22 @@ body::before {
     height: auto;
     object-fit: cover;
     transition: transform 0.3s ease;
+    
+    /* 改善图片质量 */
+    image-rendering: -webkit-optimize-contrast; /* Safari/Chrome */
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: crisp-edges; /* 标准 */
+    image-rendering: -o-crisp-edges; /* Opera */
+    
+    /* 现代浏览器的图片渲染优化 */
+    image-rendering: pixelated; /* 保持像素清晰 */
+    
+    /* 添加微妙的阴影来掩盖锯齿 */
+    filter: contrast(1.02) brightness(1.01);
+    
+    /* 确保图片不会因为缩放而模糊 */
+    backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 .photo-item:hover img {
@@ -298,7 +314,28 @@ body::before {
 
 .lightbox-content { position: relative; max-width: 95%; max-height: 90%; margin: auto; padding: 0 64px; }
 .lightbox-body { display:flex; gap:20px; align-items: stretch; }
-.lightbox-image { max-width: 70%; max-height: 80vh; object-fit: contain; border-radius: 8px; }
+.lightbox-image { 
+    max-width: 70%; 
+    max-height: 80vh; 
+    object-fit: contain; 
+    border-radius: 8px;
+    
+    /* 改善大图质量 */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: -o-crisp-edges;
+    
+    /* 大图使用高质量渲染 */
+    image-rendering: auto;
+    
+    /* 确保图片清晰度 */
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    
+    /* 添加微妙的锐化效果 */
+    filter: contrast(1.01);
+}
 .lightbox-info { width: 30%; color:#f8f9fa; background: #111827; border-left:1px solid #1f2937; padding:16px; border-radius:8px; overflow: auto; }
 .info-title { font-size: 1.2rem; margin-bottom:8px; }
 .info-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }

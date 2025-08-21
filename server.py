@@ -158,16 +158,25 @@ class AdminHandler(BaseHTTPRequestHandler):
     def handle_save_json(self):
         """处理JSON保存请求"""
         try:
+            print(f"收到保存JSON请求，路径: {self.path}")
+            print(f"请求头: {dict(self.headers)}")
+            
             content_length = int(self.headers['Content-Length'])
             json_data = self.rfile.read(content_length)
+            
+            print(f"JSON数据长度: {content_length}")
+            print(f"JSON数据预览: {json_data[:200]}...")
             
             # 保存到photos.json文件
             with open('photos.json', 'w', encoding='utf-8') as f:
                 f.write(json_data.decode('utf-8'))
             
+            print(f"JSON文件已保存到: photos.json")
+            
             result = {
                 'success': True,
-                'message': 'JSON文件已保存'
+                'message': 'JSON文件已保存',
+                'timestamp': time.time()
             }
             
             self.send_response(200)
@@ -177,6 +186,7 @@ class AdminHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(result).encode())
             
         except Exception as e:
+            print(f"保存JSON时出错: {str(e)}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')

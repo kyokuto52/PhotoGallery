@@ -1,3 +1,13 @@
 {
-  "photos": []
+  "photos": [
+    {
+      "id": 1,
+      "src": "data/1755801798162__DSC6374.jpg",
+      "title": "2025-07-28 01",
+      "description": "",
+      "tags": [
+        "SEL40F25G"
+      ]
+    }
+  ]
 }

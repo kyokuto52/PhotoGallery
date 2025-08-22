@@ -10,7 +10,21 @@
     <header class="header">
         <div class="container">
             <h1 class="title">Nova Guo's Gallery</h1>
-            <p class="subtitle">Powerd by Github Pages</p>
+            <div class="header-subtitle-row">
+                <p class="subtitle">Powerd by Github Pages</p>
+                <div class="view-mode-selector">
+                    <button class="view-mode-btn" id="viewModeBtn">
+                        <span class="btn-text">全部信息</span>
+                        <span class="btn-arrow">▼</span>
+                    </button>
+                    <div class="view-mode-dropdown" id="viewModeDropdown">
+                        <div class="dropdown-item" data-mode="full">全部信息</div>
+                        <div class="dropdown-item" data-mode="tags">图与标签</div>
+                        <div class="dropdown-item" data-mode="image">仅图片</div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </header>
 
@@ -34,9 +48,15 @@
         <div class="lightbox-content">
             <span class="close-btn" id="closeLightbox">&times;</span>
             <div class="lightbox-body">
+                <div class="lightbox-nav">
+                    <button class="nav-btn prev-btn" id="prevBtn">&#10094;</button>
+                </div>
                 <div class="lightbox-image-container">
                     <img class="lightbox-image" id="lightboxImage" src="" alt="">
                     <div class="lightbox-image-placeholder" id="imagePlaceholder"></div>
+                </div>
+                <div class="lightbox-nav">
+                    <button class="nav-btn next-btn" id="nextBtn">&#10095;</button>
                 </div>
                 <aside class="lightbox-info">
                     <h3 class="info-title" id="infoTitle"></h3>
@@ -49,10 +69,6 @@
                         <div class="exif-grid" id="exifGrid"></div>
                     </div>
                 </aside>
-            </div>
-            <div class="lightbox-nav">
-                <button class="nav-btn prev-btn" id="prevBtn">&#10094;</button>
-                <button class="nav-btn next-btn" id="nextBtn">&#10095;</button>
             </div>
         </div>
     </div>

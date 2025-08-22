@@ -77,6 +77,118 @@ body::before {
     font-weight: 300;
 }
 
+/* Header浏览模式选择器样式 */
+.header-subtitle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    position: relative;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    font-weight: 300;
+    text-align: center;
+}
+
+.view-mode-selector {
+    position: absolute;
+    right: 0;
+}
+
+.view-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    min-width: 120px;
+    justify-content: center;
+}
+
+.view-mode-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-text {
+    white-space: nowrap;
+}
+
+.btn-arrow {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.view-mode-btn.active .btn-arrow {
+    transform: rotate(180deg);
+}
+
+.view-mode-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    margin-top: 8px;
+    overflow: hidden;
+    min-width: 140px;
+}
+
+.view-mode-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    color: #333;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.dropdown-item.active {
+    background: rgba(102, 126, 234, 0.15);
+    color: #667eea;
+    font-weight: 600;
+}
+
 /* 筛选按钮 */
 .gallery-controls {
     text-align: center;
@@ -203,17 +315,25 @@ body::before {
 
 /* 标签显示 */
 .photo-tags {
-    margin-top: 10px;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
 }
 .tag {
-    background:#eef2ff;
-    color:#3b5bdb;
-    padding:4px 10px;
-    border-radius:14px;
-    font-size:0.8rem;
+    color: #007bff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.tag:hover {
+    color: #0056b3;
+}
+
+.tag:not(:last-child)::after {
+    content: "\00a0|\00a0";
+    color: #6c757d;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 /* 照片网格 */
@@ -225,17 +345,79 @@ body::before {
 }
 
 .photo-item {
-    background: white;
+    background: #fafbfc;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #f0f2f5;
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .photo-item:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    border-color: #e1e5e9;
+}
+
+/* 浏览模式样式控制 - 简化版本 */
+.photo-item.image-only {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 12px;
+}
+
+.photo-item.image-only:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* 纯图片模式完全隐藏信息区域 */
+.photo-item.image-only .photo-info {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    pointer-events: none !important;
+}
+
+/* 纯图片模式消除所有余白 */
+.photo-item.image-only {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.photo-item.image-only img {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    aspect-ratio: auto !important;
+    height: auto !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.photo-item.image-only:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 纯图片模式样式 */
+.photo-item.image-only {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 12px;
+}
+
+.photo-item.image-only:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 .photo-item img {
@@ -268,19 +450,39 @@ body::before {
 
 .photo-info {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .photo-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
     color: #2c3e50;
+    line-height: 1.3;
+    min-height: 1.3em;
+}
+
+.photo-title:empty::before {
+    content: "无标题";
+    color: #adb5bd;
+    font-style: normal;
 }
 
 .photo-description {
     color: #6c757d;
     font-size: 0.9rem;
-    line-height: 1.5;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 1.3em;
+}
+
+.photo-description:empty::before {
+    content: "无详情";
+    color: #adb5bd;
+    font-style: normal;
 }
 
 .photo-category {
@@ -317,7 +519,7 @@ body::before {
     max-width: 95%; 
     max-height: 90%; 
     margin: auto; 
-    padding: 0 64px; 
+    padding: 0 32px; 
     width: 100%;
     height: 100%;
     display: flex;
@@ -328,16 +530,16 @@ body::before {
 
 .lightbox-body { 
     display: flex; 
-    gap: 20px; 
-    align-items: flex-start; /* 改为顶部对齐，避免拉伸问题 */
+    gap: clamp(16px, 2vw, 32px); /* 响应式间距 */
+    align-items: center; /* 改为居中对齐，让所有元素垂直居中 */
     min-height: 400px; /* 确保最小高度，避免UI挤在一起 */
-    height: 80vh; /* 与图片容器保持一致 */
+    height: clamp(60vh, 85vh, 90vh); /* 响应式高度 */
 }
 
 .lightbox-image-container {
     position: relative;
-    width: 75%;
-    height: 80vh; /* 使用视口高度，更好地利用屏幕空间 */
+    flex: 3; /* 调整图片区域比例，为箭头留出空间 */
+    height: clamp(60vh, 85vh, 90vh); /* 响应式高度 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -410,8 +612,8 @@ body::before {
 
 /* 图片加载占位符 */
 .lightbox-image-placeholder {
-    width: 70%;
-    height: 80vh; /* 与图片容器保持一致 */
+    width: 80%; /* 调整宽度，与新的flex比例保持一致 */
+    height: clamp(60vh, 85vh, 90vh); /* 响应式高度，与容器保持一致 */
     min-height: 400px;
     background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
     border-radius: 8px;
@@ -437,58 +639,58 @@ body::before {
 }
 
 .lightbox-image-placeholder::after {
-    content: '图片加载中...';
+    content: 'Loading...';
     position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    color: #ffffff;
+    color: #6c757d;
     font-size: 14px;
-    opacity: 0.7;
+    opacity: 0.8;
 }
 .lightbox-info { 
-    width: 25%; 
+    flex: 0.8; /* 减少20%左右，让信息框更窄 */
     color: #f8f9fa; 
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     border-left: 1px solid #334155; 
-    padding: 24px; 
+    padding: clamp(16px, 2vw, 24px); /* 响应式内边距 */
     border-radius: 12px; 
     overflow: auto; 
-    height: 100%; /* 让信息面板填满容器高度 */
+    height: clamp(60vh, 85vh, 90vh); /* 响应式高度，与容器保持一致 */
     box-sizing: border-box; /* 确保padding不会影响总宽度 */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
 }
 
 .info-title { 
-    font-size: 1.4rem; 
-    margin-bottom: 16px; 
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem); /* 响应式字体大小 */
+    margin-bottom: clamp(12px, 1.5vw, 16px); /* 响应式边距 */
     color: #f1f5f9;
     font-weight: 600;
     border-bottom: 2px solid #3b82f6;
-    padding-bottom: 8px;
+    padding-bottom: clamp(6px, 1vw, 8px); /* 响应式内边距 */
 }
 
 .info-desc { 
     color: #cbd5e1; 
     line-height: 1.6; 
-    margin-bottom: 20px;
-    font-size: 0.95rem;
+    margin-bottom: clamp(16px, 2vw, 20px); /* 响应式边距 */
+    font-size: clamp(0.85rem, 2vw, 0.95rem); /* 响应式字体大小 */
 }
 
 .info-tags { 
     display: flex; 
     flex-wrap: wrap; 
-    gap: 8px; 
-    margin-bottom: 20px; 
+    gap: clamp(6px, 1vw, 8px); /* 响应式间距 */
+    margin-bottom: clamp(16px, 2vw, 20px); /* 响应式边距 */
 }
 
 .info-tags .tag { 
     background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
     color: #fff; 
-    padding: 6px 12px;
+    padding: clamp(5px, 1vw, 6px) clamp(10px, 1.5vw, 12px); /* 响应式内边距 */
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: clamp(0.75rem, 1.8vw, 0.85rem); /* 响应式字体大小 */
     font-weight: 500;
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
@@ -501,7 +703,7 @@ body::before {
 }
 
 .exif-title {
-    font-size: 1.1rem;
+    font-size: 0.88rem; /* 减少20%左右，从1.1rem变为0.88rem */
     color: #f1f5f9;
     margin-bottom: 16px;
     font-weight: 600;
@@ -620,17 +822,47 @@ body::before {
     background: rgba(0,0,0,0.8);
 }
 
+/* 重新设计为水平排列布局 */
 .lightbox-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    right: 0;
     display: flex;
-    justify-content: space-between;
-    padding: 0 16px;
-    pointer-events: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* 防止箭头被压缩 */
+    pointer-events: auto;
+    z-index: 1;
 }
+
+/* 左右箭头样式 */
+.lightbox-nav .prev-btn,
+.lightbox-nav .next-btn {
+    position: relative;
+}
+
+
+
+/* 调整箭头按钮样式，适合左下角布局 */
+.nav-btn {
+    background: rgba(17, 24, 39, 0.9); 
+    color: #ffffff; 
+    border: 1px solid rgba(255, 255, 255, 0.4); 
+    font-size: 1rem; 
+    padding: 8px 12px; 
+    cursor: pointer; 
+    border-radius: 8px; 
+    transition: all 0.2s ease; 
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.nav-btn:hover { 
+    background: rgba(31, 41, 55, 1); 
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+
 
 .nav-btn { background: #111827; color: #ffffff; border: 1px solid #ffffff; font-size: 1.1rem; padding: 10px 14px; cursor: pointer; border-radius: 10px; transition: background 0.2s ease, border-color 0.2s ease; pointer-events: auto; }
 .nav-btn:hover { background: #1f2937; border-color: #ffffff; }
@@ -654,6 +886,27 @@ body::before {
         font-size: 1rem;
     }
     
+    /* 移动端Header浏览模式选择器样式 */
+    .header-subtitle-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .view-mode-selector {
+        position: static;
+        margin-top: 10px;
+    }
+    
+    .view-mode-btn {
+        min-width: 100px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .view-mode-dropdown {
+        min-width: 120px;
+    }
+    
     .photo-gallery {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 15px;
@@ -668,11 +921,11 @@ body::before {
     .lightbox-content { 
         max-width: 100%; 
         max-height: 100%; 
-        padding: 56px 12px 0; 
+        padding: 56px 16px 0; 
     }
     .lightbox-body { 
         flex-direction: column; 
-        gap: 12px; 
+        gap: 16px; 
         height: auto; /* 移动端使用自适应高度 */
     }
     .lightbox-image-container { 
@@ -743,7 +996,7 @@ body::before {
         font-size: 0.8rem;
     }
     
-    .lightbox-nav { padding: 0 8px; }
+    .lightbox-nav { padding: 0 16px; }
 
     /* 移动端：将左右箭头移到图片左上角，样式匹配关闭按钮 */
     .lightbox-nav {
@@ -753,7 +1006,7 @@ body::before {
         right: auto;
         transform: none;
         justify-content: flex-start;
-        gap: 8px;
+        gap: 16px;
         pointer-events: auto;
         z-index: 1001;
     }

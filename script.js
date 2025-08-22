@@ -1,3 +1,97 @@
+// 浏览模式配置
+let currentViewMode = 'full';
+
+// 浏览模式选择器初始化
+function initializeViewModeSelector() {
+    const viewModeBtn = document.getElementById('viewModeBtn');
+    const viewModeDropdown = document.getElementById('viewModeDropdown');
+    
+    if (!viewModeBtn || !viewModeDropdown) return;
+    
+    viewModeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        viewModeDropdown.classList.toggle('show');
+        viewModeBtn.classList.toggle('active');
+    });
+    
+    // 点击其他地方关闭菜单
+    document.addEventListener('click', function() {
+        viewModeDropdown.classList.remove('show');
+        viewModeBtn.classList.remove('active');
+    });
+    
+    // 浏览模式选择
+    viewModeDropdown.addEventListener('click', function(e) {
+        if (e.target.classList.contains('dropdown-item')) {
+            const mode = e.target.dataset.mode;
+            currentViewMode = mode;
+            changeViewMode(mode);
+            
+            // 更新按钮文字
+            const btnText = viewModeBtn.querySelector('.btn-text');
+            if (btnText) {
+                btnText.textContent = e.target.textContent;
+            }
+            
+            // 关闭菜单
+            viewModeDropdown.classList.remove('show');
+            viewModeBtn.classList.remove('active');
+        }
+    });
+}
+
+// 改变浏览模式 - 使用 !important 强制覆盖
+function changeViewMode(mode) {
+    const photoItems = document.querySelectorAll('.photo-item');
+    
+    photoItems.forEach(item => {
+        const photoInfo = item.querySelector('.photo-info');
+        const photoTitle = item.querySelector('.photo-title');
+        const photoDesc = item.querySelector('.photo-description');
+        const photoTags = item.querySelector('.photo-tags');
+        
+        // 先隐藏所有元素，使用 !important
+        if (photoInfo) photoInfo.style.setProperty('display', 'none', 'important');
+        if (photoTitle) photoTitle.style.setProperty('display', 'none', 'important');
+        if (photoDesc) photoDesc.style.setProperty('display', 'none', 'important');
+        if (photoTags) photoTags.style.setProperty('display', 'none', 'important');
+        
+        // 移除所有类
+        item.classList.remove('image-only');
+        
+        // 根据模式显示相应元素，使用 !important
+        if (mode === 'full') {
+            if (photoInfo) {
+                photoInfo.style.setProperty('display', 'block', 'important');
+                photoInfo.style.setProperty('padding', '20px', 'important');
+            }
+            if (photoTitle) {
+                photoTitle.style.setProperty('display', 'block', 'important');
+                photoTitle.style.setProperty('margin-bottom', '12px', 'important');
+            }
+            if (photoDesc) {
+                photoDesc.style.setProperty('display', 'block', 'important');
+                photoDesc.style.setProperty('margin-bottom', '12px', 'important');
+            }
+            if (photoTags) {
+                photoTags.style.setProperty('display', 'flex', 'important');
+                photoTags.style.setProperty('margin-bottom', '0', 'important');
+            }
+        } else if (mode === 'tags') {
+            if (photoInfo) {
+                photoInfo.style.setProperty('display', 'block', 'important');
+                photoInfo.style.setProperty('padding', '20px', 'important');
+            }
+            if (photoTags) {
+                photoTags.style.setProperty('display', 'flex', 'important');
+                photoTags.style.setProperty('margin-bottom', '0', 'important');
+            }
+        } else if (mode === 'image') {
+            item.classList.add('image-only');
+        }
+    });
+}
+
 // 照片数据来源改为静态 JSON（photos.json）
 const photos = [];
 
@@ -22,6 +116,8 @@ const pagination = document.getElementById("pagination");
 document.addEventListener("DOMContentLoaded", function() {
     setupEventListeners();
     fetchPhotosFromJson();
+    initializeViewModeSelector();
+    changeViewMode('full');
 });
 
 // 渲染照片
@@ -55,6 +151,9 @@ function renderPhotos() {
     });
 
     renderPagination();
+    
+    // 重新应用当前的浏览模式
+    changeViewMode(currentViewMode);
 }
 
 // 动态渲染标签筛选按钮

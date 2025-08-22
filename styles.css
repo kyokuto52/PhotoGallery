@@ -312,13 +312,50 @@ body::before {
     opacity: 1;
 }
 
-.lightbox-content { position: relative; max-width: 95%; max-height: 90%; margin: auto; padding: 0 64px; }
-.lightbox-body { display:flex; gap:20px; align-items: stretch; }
+.lightbox-content { 
+    position: relative; 
+    max-width: 95%; 
+    max-height: 90%; 
+    margin: auto; 
+    padding: 0 64px; 
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box; /* 确保padding不会影响总尺寸 */
+}
+
+.lightbox-body { 
+    display: flex; 
+    gap: 20px; 
+    align-items: flex-start; /* 改为顶部对齐，避免拉伸问题 */
+    min-height: 400px; /* 确保最小高度，避免UI挤在一起 */
+    height: 80vh; /* 与图片容器保持一致 */
+}
+
+.lightbox-image-container {
+    position: relative;
+    width: 75%;
+    height: 80vh; /* 使用视口高度，更好地利用屏幕空间 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px; /* 保持最小高度作为底线 */
+}
+
 .lightbox-image { 
-    max-width: 70%; 
-    max-height: 80vh; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 居中定位 */
+    max-width: 100%; 
+    max-height: 100%; 
+    width: auto; /* 让图片保持原始宽高比 */
+    height: auto; /* 让图片保持原始宽高比 */
     object-fit: contain; 
     border-radius: 8px;
+    background: #1a1a1a; /* 图片加载时的背景色 */
     
     /* 改善大图质量 */
     image-rendering: -webkit-optimize-contrast;
@@ -331,16 +368,234 @@ body::before {
     
     /* 确保图片清晰度 */
     backface-visibility: hidden;
-    transform: translateZ(0);
+    transform: translate(-50%, -50%) translateZ(0); /* 保持居中并添加硬件加速 */
     
     /* 添加微妙的锐化效果 */
     filter: contrast(1.01);
+    
+    /* 图片加载状态 */
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
-.lightbox-info { width: 30%; color:#f8f9fa; background: #111827; border-left:1px solid #1f2937; padding:16px; border-radius:8px; overflow: auto; }
-.info-title { font-size: 1.2rem; margin-bottom:8px; }
-.info-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-.info-tags .tag { background: #374151; color:#fff; }
-.info-desc { color:#e5e7eb; line-height:1.5; }
+
+.lightbox-image.loaded {
+    opacity: 1;
+}
+
+/* 图片加载特效 */
+.lightbox-image::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid #ffffff;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.lightbox-image.loaded::before {
+    opacity: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 图片加载占位符 */
+.lightbox-image-placeholder {
+    width: 70%;
+    height: 80vh; /* 与图片容器保持一致 */
+    min-height: 400px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.lightbox-image-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid #ffffff;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.lightbox-image-placeholder::after {
+    content: '图片加载中...';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffffff;
+    font-size: 14px;
+    opacity: 0.7;
+}
+.lightbox-info { 
+    width: 25%; 
+    color: #f8f9fa; 
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-left: 1px solid #334155; 
+    padding: 24px; 
+    border-radius: 12px; 
+    overflow: auto; 
+    height: 100%; /* 让信息面板填满容器高度 */
+    box-sizing: border-box; /* 确保padding不会影响总宽度 */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.info-title { 
+    font-size: 1.4rem; 
+    margin-bottom: 16px; 
+    color: #f1f5f9;
+    font-weight: 600;
+    border-bottom: 2px solid #3b82f6;
+    padding-bottom: 8px;
+}
+
+.info-desc { 
+    color: #cbd5e1; 
+    line-height: 1.6; 
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.info-tags { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 8px; 
+    margin-bottom: 20px; 
+}
+
+.info-tags .tag { 
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+    color: #fff; 
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* EXIF元数据样式 */
+.exif-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #334155;
+}
+
+.exif-title {
+    font-size: 1.1rem;
+    color: #f1f5f9;
+    margin-bottom: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.exif-title::before {
+    content: "📷";
+    font-size: 1.2rem;
+}
+
+.exif-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.exif-item {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.exif-item:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.exif-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.exif-value {
+    font-size: 0.95rem;
+    color: #e2e8f0;
+    font-weight: 500;
+}
+
+/* 重要参数高亮 */
+.exif-item.important {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.exif-item.important .exif-label {
+    color: #86efac;
+}
+
+.exif-item.important .exif-value {
+    color: #bbf7d0;
+}
+
+/* 相机参数样式 - 使用暗色避免喧宾夺主 */
+.exif-item.camera-param {
+    background: rgba(75, 85, 99, 0.1);
+    border-color: rgba(75, 85, 99, 0.3);
+}
+
+.exif-item.camera-param .exif-label {
+    color: #9ca3af;
+}
+
+.exif-item.camera-param .exif-value {
+    color: #d1d5db;
+}
+
+/* 滚动条样式 */
+.lightbox-info::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lightbox-info::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.lightbox-info::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 3px;
+}
+
+.lightbox-info::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.7);
+}
 
 /* 移除重复的 .lightbox-image 通用规则以避免覆盖上面的尺寸设置 */
 
@@ -410,10 +665,84 @@ body::before {
         font-size: 0.9rem;
     }
     
-    .lightbox-content { max-width: 100%; max-height: 100%; padding: 56px 12px 0; }
-    .lightbox-body { flex-direction: column; gap: 12px; }
-    .lightbox-image { max-width: 100%; max-height: 62vh; }
-    .lightbox-info { width: 100%; padding: 12px; border-radius: 8px; }
+    .lightbox-content { 
+        max-width: 100%; 
+        max-height: 100%; 
+        padding: 56px 12px 0; 
+    }
+    .lightbox-body { 
+        flex-direction: column; 
+        gap: 12px; 
+        height: auto; /* 移动端使用自适应高度 */
+    }
+    .lightbox-image-container { 
+        width: 100%; 
+        height: 60vh; /* 移动端调整高度 */
+        min-height: 300px;
+    }
+    .lightbox-image { 
+        max-width: 100%; 
+        max-height: 100%; 
+    }
+    .lightbox-image-placeholder { 
+        width: 100%; 
+        height: 60vh; /* 移动端调整高度 */
+        min-height: 300px;
+    }
+    .lightbox-info { 
+        width: 100%; 
+        padding: 16px; 
+        border-radius: 8px; 
+        height: auto; /* 移动端使用自适应高度 */
+    }
+    
+    /* 移动端信息栏文字优化 */
+    .info-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+    }
+    
+    .info-desc {
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+        line-height: 1.5;
+    }
+    
+    .info-tags .tag {
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        margin-bottom: 6px;
+    }
+    
+    /* 移动端EXIF信息优化 */
+    .exif-section {
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+    
+    .exif-title {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .exif-grid {
+        gap: 8px;
+    }
+    
+    .exif-item {
+        padding: 8px;
+    }
+    
+    .exif-label {
+        font-size: 0.7rem;
+        margin-bottom: 3px;
+    }
+    
+    .exif-value {
+        font-size: 0.8rem;
+    }
+    
     .lightbox-nav { padding: 0 8px; }
 
     /* 移动端：将左右箭头移到图片左上角，样式匹配关闭按钮 */
@@ -464,6 +793,38 @@ body::before {
         display: block;
         margin: 5px auto;
         width: 80%;
+    }
+    
+    /* 超小屏幕灯箱优化 */
+    .lightbox-info {
+        padding: 12px;
+    }
+    
+    .info-title {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+    
+    .info-desc {
+        font-size: 0.8rem;
+        margin-bottom: 12px;
+    }
+    
+    .exif-title {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .exif-item {
+        padding: 6px;
+    }
+    
+    .exif-label {
+        font-size: 0.65rem;
+    }
+    
+    .exif-value {
+        font-size: 0.75rem;
     }
     /* 紧凑型标签条，单行横向滚动，减小间距与字号 */
     .gallery-controls { margin-bottom: 16px; }

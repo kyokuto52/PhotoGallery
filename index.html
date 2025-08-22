@@ -34,11 +34,20 @@
         <div class="lightbox-content">
             <span class="close-btn" id="closeLightbox">&times;</span>
             <div class="lightbox-body">
-                <img class="lightbox-image" id="lightboxImage" src="" alt="">
+                <div class="lightbox-image-container">
+                    <img class="lightbox-image" id="lightboxImage" src="" alt="">
+                    <div class="lightbox-image-placeholder" id="imagePlaceholder"></div>
+                </div>
                 <aside class="lightbox-info">
                     <h3 class="info-title" id="infoTitle"></h3>
                     <div class="info-tags" id="infoTags"></div>
                     <p class="info-desc" id="infoDesc"></p>
+                    
+                    <!-- EXIF元数据区域 -->
+                    <div class="exif-section" id="exifSection" style="display: none;">
+                        <h4 class="exif-title">拍摄参数</h4>
+                        <div class="exif-grid" id="exifGrid"></div>
+                    </div>
                 </aside>
             </div>
             <div class="lightbox-nav">

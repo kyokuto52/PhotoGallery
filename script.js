@@ -36,8 +36,12 @@ function renderPhotos() {
     pageItems.forEach((photo, index) => {
         const photoItem = document.createElement("div");
         photoItem.className = "photo-item";
+        
+        // 优先使用缩略图，如果没有则使用原图
+        const imageSrc = photo.thumbnail || photo.src;
+        
         photoItem.innerHTML = `
-            <img src="${photo.src}" alt="${photo.title}" loading="lazy">
+            <img src="${imageSrc}" alt="${photo.title}" loading="lazy" data-original="${photo.src}">
             <div class="photo-info">
                 <h3 class="photo-title">${photo.title}</h3>
                 <p class="photo-description">${photo.description}</p>
@@ -152,7 +156,18 @@ async function fetchPhotosFromJson() {
             }
             return p;
         });
-        photos.splice(0, photos.length, ...normalized);
+        
+        // 为每张照片添加缩略图路径（如果存在）
+        const withThumbnails = normalized.map(p => {
+            // 如果原图在data文件夹中，尝试生成对应的缩略图路径
+            if (p.src && p.src.startsWith('data/')) {
+                const thumbnailPath = p.src.replace('data/', 'thumbnails/');
+                return { ...p, thumbnail: thumbnailPath };
+            }
+            return p;
+        });
+        
+        photos.splice(0, photos.length, ...withThumbnails);
         currentPhotos = [...photos];
         renderPhotos();
         renderTagControls();
@@ -241,17 +256,73 @@ function renderPagination() {
 function openLightbox(index) {
     currentPhotoIndex = index;
     const photo = currentPhotos[index];
-    lightboxImage.src = photo.src;
-    lightboxImage.alt = photo.title;
+    
+    // 先显示灯箱，立即显示UI布局
+    lightbox.classList.add("show");
+    document.body.style.overflow = "hidden";
+    
+    // 重置图片加载状态
+    lightboxImage.classList.remove('loaded');
+    
+    // 显示占位符
+    const placeholder = document.getElementById('imagePlaceholder');
+    if (placeholder) {
+        placeholder.style.display = 'flex';
+    }
+    
+    // 设置图片信息
     const t = document.getElementById('infoTitle');
     const d = document.getElementById('infoDesc');
     const tg = document.getElementById('infoTags');
+    const exifSection = document.getElementById('exifSection');
+    const exifGrid = document.getElementById('exifGrid');
+    
     if (t) t.textContent = photo.title || '';
     if (d) d.textContent = photo.description || '';
     if (tg) tg.innerHTML = Array.isArray(photo.tags) ? photo.tags.map(x => `<span class=\"tag\">${x}</span>`).join('') : '';
     
-    lightbox.classList.add("show");
-    document.body.style.overflow = "hidden";
+    // 显示EXIF元数据
+    if (photo.exif && Object.keys(photo.exif).length > 0) {
+        displayExifData(photo.exif, exifGrid);
+        if (exifSection) exifSection.style.display = 'block';
+    } else {
+        if (exifSection) exifSection.style.display = 'none';
+    }
+    
+    // 预加载图片
+    const img = new Image();
+    img.onload = function() {
+        // 图片加载完成后，设置src并显示
+        lightboxImage.src = photo.src;
+        lightboxImage.alt = photo.title;
+        
+        // 隐藏占位符
+        const placeholder = document.getElementById('imagePlaceholder');
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+        
+        // 添加淡入效果
+        setTimeout(() => {
+            lightboxImage.classList.add('loaded');
+        }, 100);
+    };
+    
+    img.onerror = function() {
+        // 图片加载失败时，显示错误信息
+        lightboxImage.src = '';
+        lightboxImage.alt = '图片加载失败';
+        lightboxImage.classList.add('loaded');
+        
+        // 隐藏占位符
+        const placeholder = document.getElementById('imagePlaceholder');
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+    };
+    
+    // 开始加载图片
+    img.src = photo.src;
 }
 
 // 关闭灯箱
@@ -264,28 +335,126 @@ function closeLightboxHandler() {
 function showPrevPhoto() {
     currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
     const photo = currentPhotos[currentPhotoIndex];
-    lightboxImage.src = photo.src;
-    lightboxImage.alt = photo.title;
+    
+    // 重置图片加载状态
+    lightboxImage.classList.remove('loaded');
+    
+    // 设置图片信息
     const t = document.getElementById('infoTitle');
     const d = document.getElementById('infoDesc');
     const tg = document.getElementById('infoTags');
+    const exifSection = document.getElementById('exifSection');
+    const exifGrid = document.getElementById('exifGrid');
+    
     if (t) t.textContent = photo.title || '';
     if (d) d.textContent = photo.description || '';
     if (tg) tg.innerHTML = Array.isArray(photo.tags) ? photo.tags.map(x => `<span class=\"tag\">${x}</span>`).join('') : '';
+    
+    // 显示EXIF元数据
+    if (photo.exif && Object.keys(photo.exif).length > 0) {
+        displayExifData(photo.exif, exifGrid);
+        if (exifSection) exifSection.style.display = 'block';
+    } else {
+        if (exifSection) exifSection.style.display = 'none';
+    }
+    
+    // 显示占位符
+    const placeholder = document.getElementById('imagePlaceholder');
+    if (placeholder) {
+        placeholder.style.display = 'flex';
+    }
+    
+    // 预加载图片
+    const img = new Image();
+    img.onload = function() {
+        lightboxImage.src = photo.src;
+        lightboxImage.alt = photo.title;
+        
+        // 隐藏占位符
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+        
+        setTimeout(() => {
+            lightboxImage.classList.add('loaded');
+        }, 100);
+    };
+    
+    img.onerror = function() {
+        lightboxImage.src = '';
+        lightboxImage.alt = '图片加载失败';
+        lightboxImage.classList.add('loaded');
+        
+        // 隐藏占位符
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+    };
+    
+    img.src = photo.src;
 }
 
 // 显示下一张
 function showNextPhoto() {
     currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length;
     const photo = currentPhotos[currentPhotoIndex];
-    lightboxImage.src = photo.src;
-    lightboxImage.alt = photo.title;
+    
+    // 重置图片加载状态
+    lightboxImage.classList.remove('loaded');
+    
+    // 设置图片信息
     const t = document.getElementById('infoTitle');
     const d = document.getElementById('infoDesc');
     const tg = document.getElementById('infoTags');
+    const exifSection = document.getElementById('exifSection');
+    const exifGrid = document.getElementById('exifGrid');
+    
     if (t) t.textContent = photo.title || '';
     if (d) d.textContent = photo.description || '';
     if (tg) tg.innerHTML = Array.isArray(photo.tags) ? photo.tags.map(x => `<span class=\"tag\">${x}</span>`).join('') : '';
+    
+    // 显示EXIF元数据
+    if (photo.exif && Object.keys(photo.exif).length > 0) {
+        displayExifData(photo.exif, exifGrid);
+        if (exifSection) exifSection.style.display = 'block';
+    } else {
+        if (exifSection) exifSection.style.display = 'none';
+    }
+    
+    // 显示占位符
+    const placeholder = document.getElementById('imagePlaceholder');
+    if (placeholder) {
+        placeholder.style.display = 'flex';
+    }
+    
+    // 预加载图片
+    const img = new Image();
+    img.onload = function() {
+        lightboxImage.src = photo.src;
+        lightboxImage.alt = photo.title;
+        
+        // 隐藏占位符
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+        
+        setTimeout(() => {
+            lightboxImage.classList.add('loaded');
+        }, 100);
+    };
+    
+    img.onerror = function() {
+        lightboxImage.src = '';
+        lightboxImage.alt = '图片加载失败';
+        lightboxImage.classList.add('loaded');
+        
+        // 隐藏占位符
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+    };
+    
+    img.src = photo.src;
 }
 
 // 键盘事件
@@ -303,6 +472,55 @@ function handleKeyboard(e) {
             showNextPhoto();
             break;
     }
+}
+
+// 显示EXIF元数据
+function displayExifData(exifData, container) {
+    if (!container) return;
+    
+    // 定义所有参数（使用暗色显示）
+    const cameraParams = [
+        '相机品牌', '相机型号', '镜头型号', '焦距', '光圈值', '曝光时间', 'ISO感光度', '原始拍摄时间'
+    ];
+    
+    // 定义参数显示顺序和别名
+    const paramOrder = [
+        { key: '相机品牌', alias: '相机品牌' },
+        { key: '相机型号', alias: '相机型号' },
+        { key: '镜头型号', alias: '镜头型号' },
+        { key: '焦距', alias: '焦距' },
+        { key: '光圈值', alias: '光圈值' },
+        { key: '曝光时间', alias: '快门速度' },
+        { key: 'ISO感光度', alias: 'ISO感光度' },
+        { key: '原始拍摄时间', alias: '拍摄时间' }
+    ];
+    
+    let html = '';
+    
+            paramOrder.forEach(param => {
+            if (exifData[param.key]) {
+                const value = exifData[param.key];
+                
+                html += `
+                    <div class="exif-item camera-param">
+                        <div class="exif-label">${param.alias}</div>
+                        <div class="exif-value">${value}</div>
+                    </div>
+                `;
+            }
+        });
+    
+    // 如果没有找到任何参数，显示提示信息
+    if (!html) {
+        html = `
+            <div class="exif-item">
+                <div class="exif-label">无EXIF数据</div>
+                <div class="exif-value">此图片没有拍摄参数信息</div>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
 }
 
 // 新增照片的函数

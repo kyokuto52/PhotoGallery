@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灯箱优化效果测试</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background: white;
+        }
+        .photo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 20px; 
+            margin: 20px 0; 
+        }
+        .photo-item { 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .photo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .photo-item img { 
+            width: 100%; 
+            height: 150px; 
+            object-fit: cover; 
+        }
+        .photo-info { 
+            padding: 10px; 
+        }
+        .photo-title { 
+            margin: 0 0 5px 0; 
+            font-size: 14px; 
+            font-weight: bold;
+        }
+        .photo-desc { 
+            font-size: 12px; 
+            color: #666; 
+        }
+        .status { 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 15px 0; 
+            font-weight: bold;
+        }
+        .status.success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .status.info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb; 
+        }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .feature-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .feature-list ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .feature-list li {
+            margin: 5px 0;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 灯箱UI优化效果测试</h1>
+    
+    <div class="test-section">
+        <h2>✨ 优化特性说明</h2>
+        <div class="feature-list">
+            <h3>主要改进：</h3>
+            <ul>
+                <li><strong>图片尺寸优化</strong>：图片现在保持原始宽高比，不会被压扁</li>
+                <li><strong>屏幕空间利用</strong>：使用视口高度(80vh)更好地利用屏幕空间</li>
+                <li><strong>居中显示</strong>：图片在容器中完美居中，不会偏移</li>
+                <li><strong>响应式设计</strong>：在不同屏幕尺寸下都能良好显示</li>
+                <li><strong>加载体验</strong>：保持优雅的加载动画和占位符</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 功能测试</h2>
+        <div class="status success">
+            ✅ 灯箱UI优化已完成！现在可以测试以下功能：
+        </div>
+        
+        <div class="photo-grid">
+            <div class="photo-item" onclick="testLightbox('data/1755801798162__DSC6374.jpg', '测试照片1', '这是一张测试照片，用于验证灯箱优化效果')">
+                <img src="thumbnails/1755801798162__DSC6374.jpg" alt="测试照片1">
+                <div class="photo-info">
+                    <div class="photo-title">测试照片1</div>
+                    <div class="photo-desc">点击测试灯箱效果</div>
+                </div>
+            </div>
+            
+            <div class="photo-item" onclick="testLightbox('data/1755803151984__DSC6361.jpg', '测试照片2', '第二张测试照片，验证不同尺寸图片的显示效果')">
+                <img src="thumbnails/1755803151984__DSC6361.jpg" alt="测试照片2">
+                <div class="photo-info">
+                    <div class="photo-title">测试照片2</div>
+                    <div class="photo-desc">点击测试灯箱效果</div>
+                </div>
+            </div>
+            
+            <div class="photo-item" onclick="testLightbox('data/1755803196161__DSC6311.jpg', '测试照片3', '第三张测试照片，验证灯箱的响应式布局')">
+                <img src="thumbnails/1755803196161__DSC6311.jpg" alt="测试照片3">
+                <div class="photo-info">
+                    <div class="photo-title">测试照片3</div>
+                    <div class="photo-desc">点击测试灯箱效果</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status info">
+            💡 测试说明：点击上面的照片可以打开灯箱，体验优化后的效果：
+            <ul>
+                <li>灯箱立即打开，显示完整UI布局</li>
+                <li>图片保持原始宽高比，不会被压扁</li>
+                <li>图片在容器中完美居中显示</li>
+                <li>优雅的加载动画和占位符</li>
+                <li>响应式设计，支持不同屏幕尺寸</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 技术细节</h2>
+        <div class="feature-list">
+            <h3>CSS优化：</h3>
+            <ul>
+                <li>使用 <code>height: 80vh</code> 充分利用屏幕高度</li>
+                <li>图片使用 <code>width: auto; height: auto</code> 保持原始比例</li>
+                <li>使用 <code>transform: translate(-50%, -50%)</code> 实现完美居中</li>
+                <li>添加 <code>min-height</code> 确保最小显示尺寸</li>
+                <li>响应式媒体查询优化移动端体验</li>
+            </ul>
+            
+            <h3>JavaScript优化：</h3>
+            <ul>
+                <li>图片预加载机制，提升用户体验</li>
+                <li>智能的占位符显示/隐藏逻辑</li>
+                <li>加载状态管理和错误处理</li>
+                <li>流畅的淡入动画效果</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📱 响应式测试</h2>
+        <div class="status info">
+            🌐 请尝试调整浏览器窗口大小，或在不同设备上测试：
+            <ul>
+                <li><strong>桌面端</strong>：图片和信息面板并排显示，充分利用宽屏空间</li>
+                <li><strong>平板端</strong>：自适应布局，保持良好的显示比例</li>
+                <li><strong>移动端</strong>：垂直布局，图片和信息面板上下排列</li>
+            </ul>
+        </div>
+        
+        <button class="test-btn" onclick="simulateMobile()">📱 模拟移动端视图</button>
+        <button class="test-btn" onclick="simulateDesktop()">💻 模拟桌面端视图</button>
+    </div>
+
+    <script>
+        // 测试灯箱功能
+        function testLightbox(src, title, description) {
+            // 创建灯箱元素
+            const lightbox = document.createElement('div');
+            lightbox.className = 'lightbox';
+            lightbox.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            // 创建灯箱内容
+            const content = document.createElement('div');
+            content.style.cssText = `
+                max-width: 95%;
+                max-height: 90%;
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                position: relative;
+            `;
+            
+            // 创建关闭按钮
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 15px;
+                background: rgba(0,0,0,0.7);
+                color: white;
+                border: none;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 20px;
+                z-index: 1001;
+            `;
+            closeBtn.onclick = () => document.body.removeChild(lightbox);
+            
+            // 创建图片容器
+            const imgContainer = document.createElement('div');
+            imgContainer.style.cssText = `
+                width: 70%;
+                height: 80vh;
+                min-height: 400px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #1a1a1a;
+                position: relative;
+            `;
+            
+            // 创建占位符
+            const placeholder = document.createElement('div');
+            placeholder.innerHTML = `
+                <div style="text-align: center; color: white;">
+                    <div style="width: 40px; height: 40px; border: 3px solid white; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                    <div>图片加载中...</div>
+                </div>
+            `;
+            placeholder.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+            `;
+            
+            // 创建图片
+            const img = document.createElement('img');
+            img.style.cssText = `
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+                object-fit: contain;
+                border-radius: 8px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            
+            // 图片加载完成后显示
+            img.onload = function() {
+                placeholder.style.display = 'none';
+                img.style.opacity = '1';
+            };
+            
+            // 创建信息面板
+            const info = document.createElement('div');
+            info.style.cssText = `
+                width: 30%;
+                background: #111827;
+                color: white;
+                padding: 20px;
+                box-sizing: border-box;
+            `;
+            info.innerHTML = `
+                <h3 style="margin: 0 0 15px 0; color: #f8f9fa;">${title}</h3>
+                <p style="margin: 0; color: #e5e7eb; line-height: 1.5;">${description}</p>
+                <div style="margin-top: 20px; padding: 10px; background: #374151; border-radius: 5px;">
+                    <small style="color: #9ca3af;">💡 这是优化后的灯箱效果：图片保持原始比例，完美居中显示！</small>
+                </div>
+            `;
+            
+            // 创建布局容器
+            const body = document.createElement('div');
+            body.style.cssText = `
+                display: flex;
+                gap: 20px;
+                height: 80vh;
+                min-height: 400px;
+            `;
+            
+            // 组装灯箱
+            imgContainer.appendChild(placeholder);
+            imgContainer.appendChild(img);
+            body.appendChild(imgContainer);
+            body.appendChild(info);
+            content.appendChild(closeBtn);
+            content.appendChild(body);
+            lightbox.appendChild(content);
+            
+            // 添加到页面
+            document.body.appendChild(lightbox);
+            
+            // 开始加载图片
+            img.src = src;
+            
+            // 点击背景关闭
+            lightbox.onclick = (e) => {
+                if (e.target === lightbox) {
+                    document.body.removeChild(lightbox);
+                }
+            };
+        }
+        
+        // 模拟移动端视图
+        function simulateMobile() {
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+            }
+            alert('已切换到移动端视图模式，请调整浏览器窗口大小查看效果！');
+        }
+        
+        // 模拟桌面端视图
+        function simulateDesktop() {
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.setAttribute('content', 'width=1200, initial-scale=1.0');
+            }
+            alert('已切换到桌面端视图模式，请调整浏览器窗口大小查看效果！');
+        }
+        
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

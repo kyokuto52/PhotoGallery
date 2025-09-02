@@ -106,9 +106,6 @@ const PAGE_SIZE = 12;
 const photoGallery = document.getElementById("photoGallery");
 const lightbox = document.getElementById("lightbox");
 const lightboxImage = document.getElementById("lightboxImage");
-const closeLightbox = document.getElementById("closeLightbox");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
 const filterBtns = document.querySelectorAll(".filter-btn");
 const pagination = document.getElementById("pagination");
 
@@ -223,17 +220,28 @@ function setupEventListeners() {
         });
     });
     
-    // 关闭灯箱
-    closeLightbox.addEventListener("click", closeLightboxHandler);
+    // 关闭灯箱 - 移动端和桌面端
+    const closeLightboxMobile = document.getElementById('closeLightbox');
+    const closeLightboxDesktop = document.getElementById('closeLightboxDesktop');
+    
+    if (closeLightboxMobile) closeLightboxMobile.addEventListener("click", closeLightboxHandler);
+    if (closeLightboxDesktop) closeLightboxDesktop.addEventListener("click", closeLightboxHandler);
     lightbox.addEventListener("click", (e) => {
         if (e.target === lightbox) {
             closeLightboxHandler();
         }
     });
     
-    // 导航按钮
-    prevBtn.addEventListener("click", showPrevPhoto);
-    nextBtn.addEventListener("click", showNextPhoto);
+    // 导航按钮 - 移动端和桌面端
+    const prevBtnMobile = document.getElementById('prevBtn');
+    const nextBtnMobile = document.getElementById('nextBtn');
+    const prevBtnDesktop = document.getElementById('prevBtnDesktop');
+    const nextBtnDesktop = document.getElementById('nextBtnDesktop');
+    
+    if (prevBtnMobile) prevBtnMobile.addEventListener("click", showPrevPhoto);
+    if (nextBtnMobile) nextBtnMobile.addEventListener("click", showNextPhoto);
+    if (prevBtnDesktop) prevBtnDesktop.addEventListener("click", showPrevPhoto);
+    if (nextBtnDesktop) nextBtnDesktop.addEventListener("click", showNextPhoto);
     
     // 键盘事件
     document.addEventListener("keydown", handleKeyboard);

@@ -613,10 +613,10 @@ class AdminHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
 
-def run_server(port=3001):
+def run_server(port=8000):
     """启动服务器"""
     global httpd
-    server_address = ('', port)
+    server_address = ('127.0.0.1', port)
     httpd = HTTPServer(server_address, AdminHandler)
     print(f"🚀 本地服务器已启动，端口：{port}")
     print(f"📁 主页地址：http://localhost:{port}/")

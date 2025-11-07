@@ -8,16 +8,55 @@ function initializeViewModeSelector() {
     
     if (!viewModeBtn || !viewModeDropdown) return;
     
+    // 判断是否为移动端
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+    
+    // 更新下拉菜单位置（移动端）
+    function updateDropdownPosition() {
+        if (!isMobile()) return;
+        
+        const btnRect = viewModeBtn.getBoundingClientRect();
+        const dropdown = viewModeDropdown;
+        
+        // 计算位置：在按钮下方，右对齐
+        dropdown.style.top = (btnRect.bottom + window.scrollY + 8) + 'px';
+        dropdown.style.right = (window.innerWidth - btnRect.right) + 'px';
+    }
+    
     viewModeBtn.addEventListener('click', function(e) {
         e.stopPropagation();
+        
+        // 移动端需要计算位置
+        if (isMobile()) {
+            updateDropdownPosition();
+        }
+        
         viewModeDropdown.classList.toggle('show');
         viewModeBtn.classList.toggle('active');
     });
     
+    // 窗口大小改变时更新位置
+    window.addEventListener('resize', function() {
+        if (isMobile() && viewModeDropdown.classList.contains('show')) {
+            updateDropdownPosition();
+        }
+    });
+    
+    // 滚动时更新位置
+    window.addEventListener('scroll', function() {
+        if (isMobile() && viewModeDropdown.classList.contains('show')) {
+            updateDropdownPosition();
+        }
+    });
+    
     // 点击其他地方关闭菜单
-    document.addEventListener('click', function() {
-        viewModeDropdown.classList.remove('show');
-        viewModeBtn.classList.remove('active');
+    document.addEventListener('click', function(e) {
+        if (!viewModeBtn.contains(e.target) && !viewModeDropdown.contains(e.target)) {
+            viewModeDropdown.classList.remove('show');
+            viewModeBtn.classList.remove('active');
+        }
     });
     
     // 浏览模式选择

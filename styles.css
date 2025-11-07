@@ -189,6 +189,7 @@ body::before {
 .view-mode-selector {
     position: absolute;
     right: 0;
+    z-index: 1001;
 }
 
 .view-mode-btn {
@@ -247,7 +248,7 @@ body::before {
     visibility: hidden;
     transform: translateX(-50%) translateY(-10px);
     transition: all 0.3s ease;
-    z-index: 1000;
+    z-index: 1002;
     margin-top: 8px;
     overflow: hidden;
     min-width: 140px;
@@ -291,6 +292,7 @@ body::before {
     text-align: center;
     margin-bottom: 40px;
     font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    position: relative;
 }
 
 /* 标签控件：分隔样式 [ A | B | C ] */
@@ -301,6 +303,7 @@ body::before {
     justify-content: center;
     line-height: 1.8;
     font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    position: relative;
 }
 #tagControls .filter-btn {
     border: none;
@@ -1100,6 +1103,26 @@ body::before {
     
     .view-mode-dropdown {
         min-width: 120px;
+        z-index: 9999;
+        position: fixed;
+        left: auto;
+        right: 20px;
+        transform: translateX(0) translateY(-10px);
+        max-width: calc(100vw - 40px);
+        top: auto;
+        bottom: auto;
+    }
+    
+    .view-mode-dropdown.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0) translateY(0);
+    }
+    
+    /* 确保下拉菜单在所有内容之上 */
+    .header {
+        position: relative;
+        z-index: 1000;
     }
     
     .photo-gallery {
@@ -1349,15 +1372,29 @@ body::before {
         font-size: 0.75rem;
     }
     /* 紧凑型标签条，单行横向滚动，减小间距与字号 */
-    .gallery-controls { margin-bottom: 16px; }
-    #tagControls {
+    .gallery-controls#tagControls { 
+        margin-bottom: 16px;
+        margin-left: -20px;
+        margin-right: -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+        width: calc(100% + 40px);
         flex-wrap: nowrap;
         overflow-x: auto;
+        overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         white-space: nowrap;
         gap: 0;
         line-height: 1.4;
-        padding: 2px 6px;
+        justify-content: flex-start;
+        scroll-padding-left: 0;
+        scroll-padding-right: 0;
+        box-sizing: border-box;
+    }
+    
+    /* 确保可以滚动到最左边 */
+    #tagControls > *:first-child {
+        margin-left: 0;
     }
     #tagControls .tag-bracket { display: none; }
     #tagControls .tag-sep { margin: 0 6px; color: #b0b4bb; }

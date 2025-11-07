@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoGallery 调试检查工具</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .check-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        .info { color: #3b82f6; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #556cd6;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .status {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 PhotoGallery 自动调试检查</h1>
+    <button onclick="runAllChecks()">开始全面检查</button>
+    <button onclick="checkFont()">检查字体</button>
+    <button onclick="checkPhotos()">检查照片数据</button>
+    <button onclick="checkImages()">检查图片文件</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function runAllChecks() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>正在检查...</h2>';
+            
+            let html = '';
+            
+            // 1. 检查字体文件
+            html += await checkFontFile();
+            
+            // 2. 检查CSS文件
+            html += await checkCSS();
+            
+            // 3. 检查JavaScript文件
+            html += await checkJavaScript();
+            
+            // 4. 检查照片数据
+            html += await checkPhotosData();
+            
+            // 5. 检查图片文件
+            html += await checkImageFiles();
+            
+            // 6. 检查浏览器控制台错误
+            html += checkConsoleErrors();
+            
+            results.innerHTML = html;
+        }
+
+        async function checkFontFile() {
+            const item = document.createElement('div');
+            item.className = 'check-item';
+            
+            try {
+                const response = await fetch('ZCOOLXiaoWei-Regular.ttf');
+                if (response.ok) {
+                    item.innerHTML = `
+                        <div class="status success">✅ 字体文件检查通过</div>
+                        <p>字体文件 ZCOOLXiaoWei-Regular.ttf 存在且可访问</p>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <div class="status error">❌ 字体文件检查失败</div>
+                        <p>无法加载字体文件，状态码: ${response.status}</p>
+                    `;
+                }
+            } catch (e) {
+                item.innerHTML = `
+                    <div class="status error">❌ 字体文件检查失败</div>
+                    <p>错误: ${e.message}</p>
+                `;
+            }
+            
+            return item.outerHTML;
+        }
+
+        async function checkCSS() {
+            const item = document.createElement('div');
+            item.className = 'check-item';
+            
+            try {
+                const response = await fetch('styles.css');
+                const text = await response.text();
+                
+                let issues = [];
+                if (!text.includes('@font-face')) {
+                    issues.push('缺少 @font-face 字体声明');
+                }
+                if (!text.includes('ZCOOLXiaoWei')) {
+                    issues.push('CSS中没有使用 ZCOOLXiaoWei 字体');
+                }
+                if (!text.includes('font-family')) {
+                    issues.push('缺少 font-family 设置');
+                }
+                
+                if (issues.length === 0) {
+                    item.innerHTML = `
+                        <div class="status success">✅ CSS文件检查通过</div>
+                        <p>CSS文件存在，字体配置正确</p>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <div class="status warning">⚠️ CSS文件有问题</div>
+                        <ul>
+                            ${issues.map(i => `<li>${i}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+            } catch (e) {
+                item.innerHTML = `
+                    <div class="status error">❌ CSS文件检查失败</div>
+                    <p>错误: ${e.message}</p>
+                `;
+            }
+            
+            return item.outerHTML;
+        }
+
+        async function checkJavaScript() {
+            const item = document.createElement('div');
+            item.className = 'check-item';
+            
+            try {
+                const response = await fetch('script.js');
+                const text = await response.text();
+                
+                let issues = [];
+                // 检查常见错误
+                if (text.includes('function filterPhotosByTag')) {
+                    if (!text.includes('filterPhotosByTag(tag)')) {
+                        issues.push('filterPhotosByTag 函数可能不完整');
+                    }
+                }
+                
+                // 检查是否有未闭合的括号
+                const openBraces = (text.match(/{/g) || []).length;
+                const closeBraces = (text.match(/}/g) || []).length;
+                if (openBraces !== closeBraces) {
+                    issues.push(`大括号不匹配: 开括号 ${openBraces}, 闭括号 ${closeBraces}`);
+                }
+                
+                if (issues.length === 0) {
+                    item.innerHTML = `
+                        <div class="status success">✅ JavaScript文件检查通过</div>
+                        <p>JavaScript文件语法正确</p>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <div class="status warning">⚠️ JavaScript文件有问题</div>
+                        <ul>
+                            ${issues.map(i => `<li>${i}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+            } catch (e) {
+                item.innerHTML = `
+                    <div class="status error">❌ JavaScript文件检查失败</div>
+                    <p>错误: ${e.message}</p>
+                `;
+            }
+            
+            return item.outerHTML;
+        }
+
+        async function checkPhotosData() {
+            const item = document.createElement('div');
+            item.className = 'check-item';
+            
+            try {
+                const response = await fetch('photos.json');
+                if (!response.ok) {
+                    item.innerHTML = `
+                        <div class="status error">❌ 照片数据文件不存在</div>
+                        <p>无法加载 photos.json，状态码: ${response.status}</p>
+                    `;
+                    return item.outerHTML;
+                }
+                
+                const data = await response.json();
+                const photos = Array.isArray(data) ? data : (data.photos || []);
+                
+                if (photos.length === 0) {
+                    item.innerHTML = `
+                        <div class="status warning">⚠️ 照片数据为空</div>
+                        <p>photos.json 中没有照片数据</p>
+                    `;
+                } else {
+                    // 检查照片数据的完整性
+                    let missingSrc = 0;
+                    let missingTags = 0;
+                    photos.forEach(photo => {
+                        if (!photo.src) missingSrc++;
+                        if (!Array.isArray(photo.tags)) missingTags++;
+                    });
+                    
+                    let issues = [];
+                    if (missingSrc > 0) issues.push(`${missingSrc} 张照片缺少 src 属性`);
+                    if (missingTags > 0) issues.push(`${missingTags} 张照片缺少 tags 数组`);
+                    
+                    if (issues.length === 0) {
+                        item.innerHTML = `
+                            <div class="status success">✅ 照片数据检查通过</div>
+                            <p>找到 ${photos.length} 张照片，数据完整</p>
+                        `;
+                    } else {
+                        item.innerHTML = `
+                            <div class="status warning">⚠️ 照片数据有问题</div>
+                            <p>找到 ${photos.length} 张照片</p>
+                            <ul>
+                                ${issues.map(i => `<li>${i}</li>`).join('')}
+                            </ul>
+                        `;
+                    }
+                }
+            } catch (e) {
+                item.innerHTML = `
+                    <div class="status error">❌ 照片数据检查失败</div>
+                    <p>错误: ${e.message}</p>
+                `;
+            }
+            
+            return item.outerHTML;
+        }
+
+        async function checkImageFiles() {
+            const item = document.createElement('div');
+            item.className = 'check-item';
+            
+            try {
+                const response = await fetch('photos.json');
+                const data = await response.json();
+                const photos = Array.isArray(data) ? data : (data.photos || []);
+                
+                if (photos.length === 0) {
+                    item.innerHTML = `
+                        <div class="status warning">⚠️ 无法检查图片文件</div>
+                        <p>没有照片数据</p>
+                    `;
+                    return item.outerHTML;
+                }
+                
+                // 随机检查前5张图片
+                const samplePhotos = photos.slice(0, Math.min(5, photos.length));
+                let checked = 0;
+                let failed = 0;
+                
+                for (const photo of samplePhotos) {
+                    if (photo.src) {
+                        try {
+                            const imgResponse = await fetch(photo.src, { method: 'HEAD' });
+                            if (imgResponse.ok) {
+                                checked++;
+                            } else {
+                                failed++;
+                            }
+                        } catch (e) {
+                            failed++;
+                        }
+                    }
+                }
+                
+                if (failed === 0) {
+                    item.innerHTML = `
+                        <div class="status success">✅ 图片文件检查通过</div>
+                        <p>检查了 ${samplePhotos.length} 张图片，全部可访问</p>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <div class="status warning">⚠️ 部分图片无法访问</div>
+                        <p>检查了 ${samplePhotos.length} 张图片，${failed} 张无法访问</p>
+                    `;
+                }
+            } catch (e) {
+                item.innerHTML = `
+                    <div class="status error">❌ 图片文件检查失败</div>
+                    <p>错误: ${e.message}</p>
+                `;
+            }
+            
+            return item.outerHTML;
+        }
+
+        function checkConsoleErrors() {
+            const item = document.createElement('div');
+            item.className = 'check-item';
+            
+            // 捕获控制台错误
+            const errors = [];
+            const originalError = console.error;
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            item.innerHTML = `
+                <div class="status info">ℹ️ 浏览器控制台检查</div>
+                <p>请打开浏览器开发者工具（F12）查看控制台是否有错误</p>
+                <p>如果看到红色错误信息，请告诉我具体的错误内容</p>
+            `;
+            
+            return item.outerHTML;
+        }
+
+        async function checkFont() {
+            const results = document.getElementById('results');
+            results.innerHTML = await checkFontFile();
+        }
+
+        async function checkPhotos() {
+            const results = document.getElementById('results');
+            results.innerHTML = await checkPhotosData();
+        }
+
+        async function checkImages() {
+            const results = document.getElementById('results');
+            results.innerHTML = await checkImageFiles();
+        }
+
+        // 页面加载时自动运行检查
+        window.addEventListener('load', () => {
+            console.log('调试工具已加载，点击按钮开始检查');
+        });
+    </script>
+</body>
+</html>

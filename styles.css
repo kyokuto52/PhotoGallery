@@ -1,8 +1,10 @@
-/* 全局样式 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* 字体声明 */
+@font-face {
+    font-family: 'ZCOOLXiaoWei';
+    src: url('ZCOOLXiaoWei-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 /* 全局样式 */
@@ -13,23 +15,17 @@
 }
 
 body {
-    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     line-height: 1.6;
     color: #333;
-    background-color: #f8f9fa;
+    background-color: #f0f0f0;
     min-height: 100vh;
     min-height: -webkit-fill-available;
-}
-
-body {
-    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    /* 强制背景色 */
-    background: #f8f9fa !important;
+    /* 强制背景色 - 柔和的灰色，适合长时间浏览 */
+    background: #f0f0f0 !important;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
 /* 灯箱样式 - 彻底覆盖 */
@@ -90,13 +86,6 @@ html, body {
     height: 100%;
 }
 
-body {
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
-    position: relative;
-}
-
 .main {
     flex: 1;
 }
@@ -129,42 +118,72 @@ body::before {
     padding: 0 20px;
 }
 
-/* 头部样式 */
+/* 头部样式 - 艺术化白色半透明设计 */
 .header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    text-align: center;
-    padding: 60px 0;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    color: #1a1a1a;
+    padding: 28px 0;
     margin-bottom: 40px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 
+                0 4px 12px rgba(0, 0, 0, 0.02);
+    position: relative;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(102, 126, 234, 0.3) 20%, 
+        rgba(102, 126, 234, 0.5) 50%, 
+        rgba(102, 126, 234, 0.3) 80%, 
+        transparent 100%);
 }
 
 .title {
-    font-size: 3rem;
-    margin-bottom: 10px;
-    font-weight: 300;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    font-size: 2rem;
+    margin-bottom: 8px;
+    font-weight: 400;
+    text-align: left;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+    position: relative;
+    display: inline-block;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.6), transparent);
+    border-radius: 1px;
 }
 
 .subtitle {
-    font-size: 1.2rem;
-    opacity: 0.9;
-    font-weight: 300;
+    font-size: 0.95rem;
+    opacity: 0.65;
+    font-weight: 400;
+    color: #4a5568;
+    text-align: left;
 }
 
 /* Header浏览模式选择器样式 */
 .header-subtitle-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-top: 10px;
+    justify-content: space-between;
+    margin-top: 12px;
     position: relative;
-}
-
-.subtitle {
-    font-size: 1.2rem;
-    opacity: 0.9;
-    font-weight: 300;
-    text-align: center;
 }
 
 .view-mode-selector {
@@ -176,9 +195,9 @@ body::before {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.9);
+    color: #4a5568;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     padding: 8px 16px;
     border-radius: 20px;
     cursor: pointer;
@@ -188,13 +207,15 @@ body::before {
     backdrop-filter: blur(10px);
     min-width: 120px;
     justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .view-mode-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    color: #667eea;
 }
 
 .btn-text {
@@ -215,11 +236,13 @@ body::before {
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.06);
     opacity: 0;
     visibility: hidden;
     transform: translateX(-50%) translateY(-10px);
@@ -267,6 +290,7 @@ body::before {
 .gallery-controls {
     text-align: center;
     margin-bottom: 40px;
+    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 
 /* 标签控件：分隔样式 [ A | B | C ] */
@@ -276,6 +300,7 @@ body::before {
     gap: 8px 12px;
     justify-content: center;
     line-height: 1.8;
+    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 #tagControls .filter-btn {
     border: none;
@@ -284,10 +309,16 @@ body::before {
     padding: 6px 10px;
     margin: 0;
     border-radius: 6px;
+    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 #tagControls .filter-btn:not(.active):hover { color: #111; background: rgba(0,0,0,0.04); }
 #tagControls .filter-btn.active { color: #111; text-decoration: underline; text-underline-offset: 4px; background: rgba(0,0,0,0.04); }
-.tag-bracket, .tag-sep { color: #c0c4cc; pointer-events: none; user-select: none; }
+.tag-bracket, .tag-sep { 
+    color: #c0c4cc; 
+    pointer-events: none; 
+    user-select: none; 
+    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+}
 
 /* 照片异步加载样式（占位） */
 .photo-item img[loading="lazy"] { filter: blur(0); }
@@ -371,6 +402,7 @@ body::before {
     font-size: 1rem;
     transition: all 0.3s ease;
     font-weight: 500;
+    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 
 .filter-btn:hover {
@@ -419,11 +451,11 @@ body::before {
 }
 
 .photo-item {
-    background: #fafbfc;
+    background: #ffffff;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #f0f2f5;
+    border: 1px solid #e8e8e8;
     transition: all 0.3s ease;
     cursor: pointer;
 }
@@ -1031,23 +1063,33 @@ body::before {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+    .header {
+        padding: 20px 0;
+    }
+    
     .title {
-        font-size: 2rem;
+        font-size: 1.6rem;
+    }
+    
+    .title::after {
+        width: 40px;
     }
     
     .subtitle {
-        font-size: 1rem;
+        font-size: 0.85rem;
     }
     
     /* 移动端Header浏览模式选择器样式 */
     .header-subtitle-row {
         flex-direction: column;
         gap: 15px;
+        align-items: flex-start;
     }
     
     .view-mode-selector {
         position: static;
         margin-top: 10px;
+        align-self: flex-end;
     }
     
     .view-mode-btn {

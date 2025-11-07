@@ -1,5 +1,6 @@
 // 浏览模式配置
 let currentViewMode = 'full';
+let currentSortMode = 'time-asc'; // 默认时间正向排序
 
 // 浏览模式选择器初始化
 function initializeViewModeSelector() {
@@ -153,6 +154,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupEventListeners();
     fetchPhotosFromJson();
     initializeViewModeSelector();
+    initializeSortSelector();
     changeViewMode('full');
 });
 
@@ -314,7 +316,8 @@ async function fetchPhotosFromJson() {
         });
         
         photos.splice(0, photos.length, ...withThumbnails);
-        currentPhotos = [...photos];
+        // 应用当前排序
+        applySort(currentSortMode);
         renderPhotos();
         renderTagControls();
     } catch (e) {
@@ -323,15 +326,149 @@ async function fetchPhotosFromJson() {
     }
 }
 
-// 过滤照片（按标签）
-function filterPhotosByTag(tag) {
-    if (tag === 'all') {
-        currentPhotos = [...photos];
-    } else {
-        currentPhotos = photos.filter(p => Array.isArray(p.tags) && p.tags.includes(tag));
+// 获取照片的时间戳
+function getPhotoTimestamp(photo) {
+    // 优先使用EXIF中的原始拍摄时间
+    if (photo.exif && photo.exif['原始拍摄时间']) {
+        const timeStr = photo.exif['原始拍摄时间'];
+        // 格式: "2022:10:23 17:15:54"
+        const date = new Date(timeStr.replace(/:/g, '-').replace(' ', 'T'));
+        if (!isNaN(date.getTime())) {
+            return date.getTime();
+        }
     }
+    
+    // 其次使用EXIF中的拍摄时间
+    if (photo.exif && photo.exif['拍摄时间']) {
+        const timeStr = photo.exif['拍摄时间'];
+        const date = new Date(timeStr.replace(/:/g, '-').replace(' ', 'T'));
+        if (!isNaN(date.getTime())) {
+            return date.getTime();
+        }
+    }
+    
+    // 从文件名中提取时间戳（如果文件名以时间戳开头）
+    if (photo.src) {
+        const match = photo.src.match(/(\d{13})/);
+        if (match) {
+            return parseInt(match[1]);
+        }
+    }
+    
+    // 使用id作为后备（假设id是按时间顺序的）
+    return photo.id || 0;
+}
+
+// 排序照片
+function applySort(sortMode) {
+    const filtered = currentTagFilter === 'all' 
+        ? [...photos] 
+        : photos.filter(p => Array.isArray(p.tags) && p.tags.includes(currentTagFilter));
+    
+    if (sortMode === 'time-asc') {
+        // 时间正向：从早到晚
+        currentPhotos = filtered.sort((a, b) => getPhotoTimestamp(a) - getPhotoTimestamp(b));
+    } else if (sortMode === 'time-desc') {
+        // 时间反向：从晚到早
+        currentPhotos = filtered.sort((a, b) => getPhotoTimestamp(b) - getPhotoTimestamp(a));
+    } else {
+        currentPhotos = filtered;
+    }
+    
     currentPage = 1;
     renderPhotos();
+}
+
+// 排序选择器初始化
+function initializeSortSelector() {
+    const sortBtn = document.getElementById('sortBtn');
+    const sortDropdown = document.getElementById('sortDropdown');
+    
+    if (!sortBtn || !sortDropdown) return;
+    
+    // 判断是否为移动端
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+    
+    // 更新下拉菜单位置（移动端）
+    function updateDropdownPosition() {
+        if (!isMobile()) return;
+        
+        const btnRect = sortBtn.getBoundingClientRect();
+        const dropdown = sortDropdown;
+        
+        // 计算位置：在按钮下方，右对齐
+        dropdown.style.top = (btnRect.bottom + window.scrollY + 8) + 'px';
+        dropdown.style.right = (window.innerWidth - btnRect.right) + 'px';
+    }
+    
+    sortBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        // 移动端需要计算位置
+        if (isMobile()) {
+            updateDropdownPosition();
+        }
+        
+        sortDropdown.classList.toggle('show');
+        sortBtn.classList.toggle('active');
+    });
+    
+    // 窗口大小改变时更新位置
+    window.addEventListener('resize', function() {
+        if (isMobile() && sortDropdown.classList.contains('show')) {
+            updateDropdownPosition();
+        }
+    });
+    
+    // 滚动时更新位置
+    window.addEventListener('scroll', function() {
+        if (isMobile() && sortDropdown.classList.contains('show')) {
+            updateDropdownPosition();
+        }
+    });
+    
+    // 点击其他地方关闭菜单
+    document.addEventListener('click', function(e) {
+        if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
+            sortDropdown.classList.remove('show');
+            sortBtn.classList.remove('active');
+        }
+    });
+    
+    // 排序选择
+    sortDropdown.addEventListener('click', function(e) {
+        if (e.target.classList.contains('dropdown-item')) {
+            const sortMode = e.target.dataset.sort;
+            currentSortMode = sortMode;
+            applySort(sortMode);
+            
+            // 更新按钮文字
+            const btnText = sortBtn.querySelector('.btn-text');
+            if (btnText) {
+                btnText.textContent = e.target.textContent;
+            }
+            
+            // 关闭菜单
+            sortDropdown.classList.remove('show');
+            sortBtn.classList.remove('active');
+        }
+    });
+    
+    // 设置初始按钮文字
+    const initialText = currentSortMode === 'time-asc' ? '时间正向' : '时间反向';
+    const btnText = sortBtn.querySelector('.btn-text');
+    if (btnText) {
+        btnText.textContent = initialText;
+    }
+}
+
+// 过滤照片（按标签）
+function filterPhotosByTag(tag) {
+    currentTagFilter = tag;
+    // 应用当前排序
+    applySort(currentSortMode);
 }
 
 function renderPagination() {

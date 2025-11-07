@@ -130,6 +130,7 @@ body::before {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 
                 0 4px 12px rgba(0, 0, 0, 0.02);
     position: relative;
+    z-index: 1000;
 }
 
 .header::before {
@@ -186,13 +187,23 @@ body::before {
     position: relative;
 }
 
-.view-mode-selector {
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     position: absolute;
     right: 0;
     z-index: 1001;
 }
 
-.view-mode-btn {
+.view-mode-selector,
+.sort-selector {
+    position: relative;
+    z-index: 10001;
+}
+
+.view-mode-btn,
+.sort-btn {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -209,9 +220,15 @@ body::before {
     min-width: 120px;
     justify-content: center;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 
-.view-mode-btn:hover {
+.sort-btn {
+    min-width: 100px;
+}
+
+.view-mode-btn:hover,
+.sort-btn:hover {
     background: rgba(255, 255, 255, 1);
     border-color: rgba(102, 126, 234, 0.3);
     transform: translateY(-1px);
@@ -228,11 +245,13 @@ body::before {
     transition: transform 0.3s ease;
 }
 
-.view-mode-btn.active .btn-arrow {
+.view-mode-btn.active .btn-arrow,
+.sort-btn.active .btn-arrow {
     transform: rotate(180deg);
 }
 
-.view-mode-dropdown {
+.view-mode-dropdown,
+.sort-dropdown {
     position: absolute;
     top: 100%;
     left: 50%;
@@ -248,13 +267,18 @@ body::before {
     visibility: hidden;
     transform: translateX(-50%) translateY(-10px);
     transition: all 0.3s ease;
-    z-index: 1002;
+    z-index: 10000;
     margin-top: 8px;
     overflow: hidden;
     min-width: 140px;
 }
 
-.view-mode-dropdown.show {
+.sort-dropdown {
+    min-width: 120px;
+}
+
+.view-mode-dropdown.show,
+.sort-dropdown.show {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
@@ -293,6 +317,7 @@ body::before {
     margin-bottom: 40px;
     font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     position: relative;
+    z-index: 1;
 }
 
 /* 标签控件：分隔样式 [ A | B | C ] */
@@ -1089,19 +1114,28 @@ body::before {
         align-items: flex-start;
     }
     
-    .view-mode-selector {
+    .header-controls {
         position: static;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
         margin-top: 10px;
-        align-self: flex-end;
     }
     
-    .view-mode-btn {
+    .view-mode-selector,
+    .sort-selector {
+        position: relative;
+    }
+    
+    .view-mode-btn,
+    .sort-btn {
         min-width: 100px;
         padding: 6px 12px;
         font-size: 0.85rem;
     }
     
-    .view-mode-dropdown {
+    .view-mode-dropdown,
+    .sort-dropdown {
         min-width: 120px;
         z-index: 9999;
         position: fixed;
@@ -1113,7 +1147,8 @@ body::before {
         bottom: auto;
     }
     
-    .view-mode-dropdown.show {
+    .view-mode-dropdown.show,
+    .sort-dropdown.show {
         opacity: 1;
         visibility: visible;
         transform: translateX(0) translateY(0);

@@ -15,18 +15,29 @@
             <h1 class="title">Nova Guo's Gallery</h1>
             <div class="header-subtitle-row">
                 <p class="subtitle">Powerd by Github Pages</p>
-                <div class="view-mode-selector">
-                    <button class="view-mode-btn" id="viewModeBtn">
-                        <span class="btn-text">全部信息</span>
-                        <span class="btn-arrow">▼</span>
-                    </button>
-                    <div class="view-mode-dropdown" id="viewModeDropdown">
-                        <div class="dropdown-item" data-mode="full">全部信息</div>
-                        <div class="dropdown-item" data-mode="tags">图与标签</div>
-                        <div class="dropdown-item" data-mode="image">仅图片</div>
+                <div class="header-controls">
+                    <div class="sort-selector">
+                        <button class="sort-btn" id="sortBtn">
+                            <span class="btn-text">时间排序</span>
+                            <span class="btn-arrow">▼</span>
+                        </button>
+                        <div class="sort-dropdown" id="sortDropdown">
+                            <div class="dropdown-item" data-sort="time-asc">时间正向</div>
+                            <div class="dropdown-item" data-sort="time-desc">时间反向</div>
+                        </div>
+                    </div>
+                    <div class="view-mode-selector">
+                        <button class="view-mode-btn" id="viewModeBtn">
+                            <span class="btn-text">全部信息</span>
+                            <span class="btn-arrow">▼</span>
+                        </button>
+                        <div class="view-mode-dropdown" id="viewModeDropdown">
+                            <div class="dropdown-item" data-mode="full">全部信息</div>
+                            <div class="dropdown-item" data-mode="tags">图与标签</div>
+                            <div class="dropdown-item" data-mode="image">仅图片</div>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </header>

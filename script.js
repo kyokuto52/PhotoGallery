@@ -55,8 +55,8 @@ function initializeViewModeSelector() {
     // 点击其他地方关闭菜单
     document.addEventListener('click', function(e) {
         if (!viewModeBtn.contains(e.target) && !viewModeDropdown.contains(e.target)) {
-            viewModeDropdown.classList.remove('show');
-            viewModeBtn.classList.remove('active');
+        viewModeDropdown.classList.remove('show');
+        viewModeBtn.classList.remove('active');
         }
     });
     

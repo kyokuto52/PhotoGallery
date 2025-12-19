@@ -28,6 +28,46 @@ body {
     position: relative;
 }
 
+/* Intro overlay for opening animation */
+.intro-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f8ff 100%);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* 只在动画期间阻挡交互，可根据需求切换 */
+    overflow: hidden;
+}
+
+.intro-line {
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #8b5cf6);
+    border-radius: 4px;
+    transform-origin: center center;
+    box-shadow: 0 6px 18px rgba(103, 110, 234, 0.18);
+    animation: introExpand 900ms cubic-bezier(.22,.9,.2,1) 300ms forwards, introFadeOut 400ms ease 1200ms forwards;
+}
+
+@keyframes introExpand {
+    0% { width: 0%; }
+    60% { width: 60%; }
+    100% { width: 120%; }
+}
+
+@keyframes introFadeOut {
+    0% { opacity: 1; transform: scaleY(1); }
+    70% { opacity: 1; }
+    100% { opacity: 0; transform: scaleY(0.2) translateY(-120vh); }
+}
+
+/* 当动画完成后，隐藏 overlay 并淡入正文 */
+body.intro-done .intro-overlay { display: none; }
+body:not(.intro-done) .main, body:not(.intro-done) .header, body:not(.intro-done) .footer { opacity: 0; transform: translateY(6px); }
+body.intro-done .main, body.intro-done .header, body.intro-done .footer { opacity: 1; transform: none; transition: opacity 400ms ease, transform 400ms ease; }
+
 /* 灯箱样式 - 彻底覆盖 */
 .lightbox {
     display: none;

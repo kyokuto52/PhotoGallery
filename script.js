@@ -1,3 +1,44 @@
+// Intro animation control
+(function() {
+    const DURATION = 1600; // 与 CSS 动画时间保持一致（ms）
+
+    function finishIntro() {
+        if (document.body.classList.contains('intro-done')) return;
+        document.body.classList.add('intro-done');
+
+        // 移除 overlay 节点以释放点击事件
+        const overlay = document.getElementById('introOverlay');
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }
+
+    // 当 DOM 就绪后开始计时
+    document.addEventListener('DOMContentLoaded', function() {
+        // 如果没有 overlay，则立即标记为完成
+        const overlay = document.getElementById('introOverlay');
+        if (!overlay) return document.body.classList.add('intro-done');
+
+        // 设定超时，防止动画未触发或资源阻塞
+        const t = setTimeout(() => finishIntro(), DURATION + 300);
+
+        // 允许用户通过点击或按键跳过动画
+        function skip() {
+            clearTimeout(t);
+            finishIntro();
+        }
+
+        overlay.addEventListener('click', skip, { once: true });
+        document.addEventListener('keydown', skip, { once: true });
+
+        // 在动画结束后清理
+        overlay.addEventListener('animationend', function(e) {
+            // 监听 introFadeOut 完成
+            if (e.animationName === 'introFadeOut') {
+                finishIntro();
+            }
+        });
+    });
+})();
+
 // 浏览模式配置
 let currentViewMode = 'full';
 let currentSortMode = 'time-asc'; // 默认时间正向排序

@@ -67,8 +67,8 @@ def generate_thumbnails():
                     img = img.convert('RGB')
                 
                 # 计算缩略图尺寸（保持宽高比）
-                max_width = 400
-                max_height = 300
+                max_width = 600
+                max_height = 450
                 
                 # 获取原始尺寸
                 width, height = img.size
@@ -86,16 +86,16 @@ def generate_thumbnails():
                     new_width = int(width * ratio)
                     new_height = int(height * ratio)
                     
-                    # 生成缩略图
+                    # 生成缩略图 - 使用高质量重采样
                     thumbnail = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
                     
-                    # 保存缩略图，优化质量
+                    # 保存缩略图，提升质量
                     if filename.lower().endswith('.png'):
                         # PNG格式保持原格式
                         thumbnail.save(thumbnail_path, 'PNG', optimize=True)
                     else:
-                        # 其他格式转换为JPEG
-                        thumbnail.save(thumbnail_path, 'JPEG', quality=85, optimize=True)
+                        # 其他格式转换为JPEG - 提升质量到90
+                        thumbnail.save(thumbnail_path, 'JPEG', quality=90, optimize=True)
                     
                     print(f"✅ 生成 {filename} 缩略图 ({new_width}x{new_height})")
                 

@@ -27,6 +27,19 @@ except ImportError:
     print("⚠️  警告：Pillow库未安装，无法生成缩略图和提取EXIF")
     print("💡 请运行：pip install Pillow")
 
+# HEIC/HEIF 支持（可选）：pillow-heif 会为 Pillow 注册 HEIF/HEIC 打开器
+try:
+    import pillow_heif
+    try:
+        pillow_heif.register_heif_opener()
+        HEIF_AVAILABLE = True
+        print('✅ pillow_heif 已加载：支持 HEIC/HEIF 文件')
+    except Exception as e:
+        HEIF_AVAILABLE = False
+        print('⚠️ pillow_heif 加载失败：', e)
+except Exception:
+    HEIF_AVAILABLE = False
+
 # 全局服务器变量
 httpd = None
 

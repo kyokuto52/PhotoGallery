@@ -127,47 +127,23 @@ function changeViewMode(mode) {
     
     photoItems.forEach(item => {
         const photoInfo = item.querySelector('.photo-info');
-        const photoTitle = item.querySelector('.photo-title');
-        const photoDesc = item.querySelector('.photo-description');
         const photoTags = item.querySelector('.photo-tags');
-        
-        // 先隐藏所有元素，使用 !important
-        if (photoInfo) photoInfo.style.setProperty('display', 'none', 'important');
-        if (photoTitle) photoTitle.style.setProperty('display', 'none', 'important');
-        if (photoDesc) photoDesc.style.setProperty('display', 'none', 'important');
-        if (photoTags) photoTags.style.setProperty('display', 'none', 'important');
         
         // 移除所有类
         item.classList.remove('image-only');
         
-        // 根据模式显示相应元素，使用 !important
+        // 根据模式显示相应元素
         if (mode === 'full') {
-            if (photoInfo) {
-                photoInfo.style.setProperty('display', 'block', 'important');
-                photoInfo.style.setProperty('padding', '20px', 'important');
-            }
-            if (photoTitle) {
-                photoTitle.style.setProperty('display', 'block', 'important');
-                photoTitle.style.setProperty('margin-bottom', '12px', 'important');
-            }
-            if (photoDesc) {
-                photoDesc.style.setProperty('display', 'block', 'important');
-                photoDesc.style.setProperty('margin-bottom', '12px', 'important');
-            }
-            if (photoTags) {
-                photoTags.style.setProperty('display', 'flex', 'important');
-                photoTags.style.setProperty('margin-bottom', '0', 'important');
-            }
-        } else if (mode === 'tags') {
+            // 显示标签
             if (photoInfo) {
                 photoInfo.style.setProperty('display', 'block', 'important');
                 photoInfo.style.setProperty('padding', '20px', 'important');
             }
             if (photoTags) {
                 photoTags.style.setProperty('display', 'flex', 'important');
-                photoTags.style.setProperty('margin-bottom', '0', 'important');
             }
         } else if (mode === 'image') {
+            // 仅图片
             item.classList.add('image-only');
         }
     });
@@ -179,7 +155,8 @@ const photos = [];
 // 当前显示的照片
 let currentPhotos = [...photos];
 let currentPhotoIndex = 0;
-let currentTagFilter = 'all';
+let currentCameraFilter = 'all';
+let currentLensFilter = 'all';
 let currentPage = 1;
 const PAGE_SIZE = 12;
 
@@ -218,9 +195,10 @@ function renderPhotos() {
         photoItem.innerHTML = `
             <img src="${imageSrc}" alt="${photo.title}" loading="lazy" data-original="${photo.src}">
             <div class="photo-info">
-                <h3 class="photo-title">${photo.title}</h3>
-                <p class="photo-description">${photo.description}</p>
-                <div class="photo-tags">${Array.isArray(photo.tags) ? photo.tags.map(t => `<span class=\"tag\">${t}</span>`).join('') : ''}</div>
+                <div class="photo-meta">
+                    <span class="photo-camera">${photo.camera || ''}</span>
+                    <div class="photo-tags">${Array.isArray(photo.tags) ? photo.tags.map(t => `<span class=\"tag\">${t}</span>`).join('') : ''}</div>
+                </div>
             </div>
         `;
         
@@ -239,68 +217,99 @@ function renderPhotos() {
 function renderTagControls() {
     const controls = document.getElementById('tagControls');
     if (!controls) return;
-    const unique = new Set();
-    photos.forEach(p => (Array.isArray(p.tags) ? p.tags : []).forEach(t => unique.add(t)));
-    // 清空“全部”之外的内容
+
+    // 收集相机集合；镜头集合**按当前相机筛选**以便只展示有图片的镜头
+    const cameras = new Set();
+    photos.forEach(p => { if (p.camera) cameras.add(p.camera); });
+
+    // 当相机未选择（all）时，展示所有镜头；否则只展示与当前相机匹配的镜头
+    const lenses = new Set();
+    photos.forEach(p => {
+        if (currentCameraFilter === 'all' || p.camera === currentCameraFilter) {
+            if (Array.isArray(p.tags)) p.tags.forEach(t => lenses.add(t));
+        }
+    });
+
     controls.innerHTML = '';
 
-    const bracketL = document.createElement('span');
-    bracketL.textContent = '[';
-    bracketL.className = 'tag-bracket';
-    controls.appendChild(bracketL);
+    // 创建单行辅助函数
+    function makeRow(title, items, type) {
+        const row = document.createElement('div');
+        row.className = 'filter-row';
 
-    // 全部按钮
-    const allBtn = document.createElement('button');
-    allBtn.className = 'filter-btn active';
-    allBtn.dataset.filter = 'all';
-    allBtn.textContent = '全部';
-    allBtn.addEventListener('click', () => {
-        currentTagFilter = 'all';
-        currentPage = 1;
-        filterPhotosByTag('all');
-        controls.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
-        allBtn.classList.add('active');
-    });
-    controls.appendChild(allBtn);
+        const label = document.createElement('span');
+        label.className = 'filter-row-label';
+        label.textContent = title + ':';
+        row.appendChild(label);
 
-    const tags = Array.from(unique).sort();
-    tags.forEach((tag, idx) => {
-        const sep = document.createElement('span');
-        sep.textContent = '|';
-        sep.className = 'tag-sep';
-        controls.appendChild(sep);
-
-        const btn = document.createElement('button');
-        btn.className = 'filter-btn';
-        btn.dataset.filter = tag;
-        btn.textContent = tag;
-        btn.addEventListener('click', () => {
-            currentTagFilter = tag;
-            currentPage = 1;
-            filterPhotosByTag(tag);
-            controls.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
-            btn.classList.add('active');
+        const allBtn = document.createElement('button');
+        allBtn.className = 'filter-btn' + ((type === 'camera' && currentCameraFilter === 'all') || (type === 'lens' && currentLensFilter === 'all') ? ' active' : '');
+        allBtn.dataset.filter = 'all';
+        allBtn.dataset.type = type;
+        allBtn.textContent = '全部';
+        allBtn.addEventListener('click', () => {
+            if (type === 'camera') {
+                currentCameraFilter = 'all';
+                // 切换相机后重置不可用的镜头选择
+                if (!currentPhotos.some(p => Array.isArray(p.tags) && p.tags.includes(currentLensFilter))) {
+                    currentLensFilter = 'all';
+                }
+                applySort(currentSortMode);
+                // 重新渲染以刷新镜头行
+                renderTagControls();
+            } else {
+                currentLensFilter = 'all';
+                applySort(currentSortMode);
+                // 更新 active（在同一行内）
+                row.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
+                allBtn.classList.add('active');
+            }
         });
-        controls.appendChild(btn);
-    });
+        row.appendChild(allBtn);
 
-    const bracketR = document.createElement('span');
-    bracketR.textContent = ']';
-    bracketR.className = 'tag-bracket';
-    controls.appendChild(bracketR);
+        const arr = Array.from(items).sort();
+        arr.forEach(it => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn' + ((type === 'camera' && currentCameraFilter === it) || (type === 'lens' && currentLensFilter === it) ? ' active' : '');
+            btn.dataset.filter = it;
+            btn.dataset.type = type;
+            btn.textContent = it;
+            btn.addEventListener('click', () => {
+                if (type === 'camera') {
+                    currentCameraFilter = it;
+                    // 切换相机后若当前 lens 不存在于结果中则重置为 all
+                    if (!currentPhotos.some(p => Array.isArray(p.tags) && p.tags.includes(currentLensFilter))) {
+                        currentLensFilter = 'all';
+                    }
+                    applySort(currentSortMode);
+                    // 重新渲染以刷新镜头行
+                    renderTagControls();
+                } else {
+                    currentLensFilter = it;
+                    applySort(currentSortMode);
+                    // 更新 active（在同一行内）
+                    row.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
+                    btn.classList.add('active');
+                }
+            });
+            row.appendChild(btn);
+        });
+
+        return row;
+    }
+
+    // Camera row
+    const camRow = makeRow('相机', cameras, 'camera');
+    controls.appendChild(camRow);
+
+    // Lens row
+    const lensRow = makeRow('镜头', lenses, 'lens');
+    controls.appendChild(lensRow);
 }
 
 // 绑定事件
 function setupEventListeners() {
-    // 初始“全部”按钮
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const filter = btn.dataset.filter;
-            filterPhotosByTag(filter);
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
+    // 标签按钮由 renderTagControls 动态生成并绑定
     
     // 关闭灯箱 - 移动端和桌面端
     const closeLightboxMobile = document.getElementById('closeLightbox');
@@ -339,19 +348,36 @@ async function fetchPhotosFromJson() {
         const list = Array.isArray(payload) ? payload : (Array.isArray(payload.photos) ? payload.photos : []);
         // 兼容旧结构：无 tags 则尝试用 category 映射
         const normalized = list.map(p => {
-            if (!Array.isArray(p.tags)) {
-                const t = (p.category && typeof p.category === 'string') ? [p.category] : [];
-                return { ...p, tags: t };
+            // ensure tags exists
+            let tags = Array.isArray(p.tags) ? p.tags : ((p.category && typeof p.category === 'string') ? [p.category] : []);
+            // derive camera from EXIF if not present
+            let camera = p.camera || '';
+            if (!camera && p.exif) {
+                camera = p.exif['相机型号'] || p.exif['相机品牌'] || '';
             }
-            return p;
+            return { ...p, tags, camera };
         });
         
-        // 为每张照片添加缩略图路径（如果存在）
+        // 为每张照片添加缩略图路径（如果存在），并优先使用 JPG 缩略图以兼容浏览器
         const withThumbnails = normalized.map(p => {
-            // 如果原图在data文件夹中，尝试生成对应的缩略图路径
-            if (p.src && p.src.startsWith('data/')) {
-                const thumbnailPath = p.src.replace('data/', 'thumbnails/');
-                return { ...p, thumbnail: thumbnailPath };
+            // 优先使用 photos.json 中的 thumbnailPath 字段（可能来自管理员上传）
+            let thumb = p.thumbnailPath || null;
+            if (thumb) thumb = thumb.replace(/\\/g, '/');
+
+            // 如果没有 thumbnailPath，基于 src 生成
+            if (!thumb && p.src && p.src.startsWith('data/')) {
+                thumb = p.src.replace('data/', 'thumbnails/');
+            }
+
+            if (thumb) {
+                // 若是 HEIC/HEIF 扩展名，优先尝试对应的 .jpg 缩略图
+                const lower = thumb.toLowerCase();
+                if (lower.endsWith('.heic') || lower.endsWith('.heif')) {
+                    const jpgThumb = thumb.replace(/\.(heic|heif)$/i, '.jpg');
+                    // 使用 .jpg 路径（生成脚本已创建 .jpg 缩略图）
+                    thumb = jpgThumb;
+                }
+                return { ...p, thumbnail: thumb };
             }
             return p;
         });
@@ -402,20 +428,21 @@ function getPhotoTimestamp(photo) {
 
 // 排序照片
 function applySort(sortMode) {
-    const filtered = currentTagFilter === 'all' 
-        ? [...photos] 
-        : photos.filter(p => Array.isArray(p.tags) && p.tags.includes(currentTagFilter));
-    
+    // 先按相机与镜头过滤
+    const filtered = photos.filter(p => {
+        const okCamera = currentCameraFilter === 'all' || (p.camera && p.camera === currentCameraFilter);
+        const okLens = currentLensFilter === 'all' || (Array.isArray(p.tags) && p.tags.includes(currentLensFilter));
+        return okCamera && okLens;
+    });
+
     if (sortMode === 'time-asc') {
-        // 时间正向：从早到晚
         currentPhotos = filtered.sort((a, b) => getPhotoTimestamp(a) - getPhotoTimestamp(b));
     } else if (sortMode === 'time-desc') {
-        // 时间反向：从晚到早
         currentPhotos = filtered.sort((a, b) => getPhotoTimestamp(b) - getPhotoTimestamp(a));
     } else {
         currentPhotos = filtered;
     }
-    
+
     currentPage = 1;
     renderPhotos();
 }
@@ -507,8 +534,8 @@ function initializeSortSelector() {
 
 // 过滤照片（按标签）
 function filterPhotosByTag(tag) {
-    currentTagFilter = tag;
-    // 应用当前排序
+    // 兼容旧代码：将单一标签过滤视为镜头过滤
+    currentLensFilter = tag;
     applySort(currentSortMode);
 }
 

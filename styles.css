@@ -164,7 +164,7 @@ body::before {
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     color: #1a1a1a;
     padding: 28px 0;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 
                 0 4px 12px rgba(0, 0, 0, 0.02);
@@ -189,13 +189,50 @@ body::before {
 
 .title {
     font-size: 2rem;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-weight: 400;
     text-align: left;
     color: #1a1a1a;
     letter-spacing: -0.02em;
     position: relative;
     display: inline-block;
+}
+
+.title-underline {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: rgba(153, 162, 255, 0.15);
+    border-radius: 1px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.title-underline::before {
+    content: '';
+    position: absolute;
+    left: -100%;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        rgba(153, 162, 255, 0.3) 25%,
+        rgba(135, 168, 255, 0.5) 50%,
+        rgba(153, 162, 255, 0.3) 75%,
+        transparent 100%);
+    border-radius: 1px;
+    animation: tideFlow 4s ease-in-out infinite;
+}
+
+@keyframes tideFlow {
+    0% { left: -100%; opacity: 0.6; }
+    50% { left: 0%; opacity: 1; }
+    100% { left: 100%; opacity: 0.6; }
+}
 }
 
 .title::after {
@@ -362,16 +399,33 @@ body::before {
 /* 标签控件：分隔样式 [ A | B | C ] */
 #tagControls {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: flex-start;
     line-height: 1.8;
     font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     position: relative;
 }
-#tagControls { flex-direction: column; gap: 10px; }
-#tagControls .filter-row { display: flex; gap: 8px 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
-#tagControls .filter-row-label { color: #6c757d; margin-right: 6px; font-weight: 600; }
+#tagControls .filter-row {
+    display: flex;
+    gap: 8px 12px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+/* 移动端横向滚动 */
+@media (max-width: 768px) {
+    #tagControls .filter-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    #tagControls .filter-row::-webkit-scrollbar { display: none; }
+}
+#tagControls .filter-row-label { color: #6c757d; margin-right: 6px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
 #tagControls .filter-btn {
     border: none;
     background: transparent;
@@ -380,6 +434,8 @@ body::before {
     margin: 0;
     border-radius: 6px;
     font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 #tagControls .filter-btn:not(.active):hover { color: #111; background: rgba(0,0,0,0.04); }
 #tagControls .filter-btn.active { color: #111; text-decoration: underline; text-underline-offset: 4px; background: rgba(0,0,0,0.04); }
@@ -461,33 +517,7 @@ body::before {
     margin-top: 8px;
 }
 
-.filter-btn {
-    background: white;
-    border: 2px solid #e9ecef;
-    color: #6c757d;
-    padding: 12px 24px;
-    margin: 0 8px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    font-family: "ZCOOLXiaoWei", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-}
-
-.filter-btn:hover {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.filter-btn.active {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-}
+/* 通用按钮样式已移至 #tagControls .filter-btn */
 
 /* 标签显示 (单行：相机 + 标签) */
 .photo-meta {
@@ -1173,17 +1203,20 @@ body::before {
     
     /* 移动端Header浏览模式选择器样式 */
     .header-subtitle-row {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
     }
     
     .header-controls {
         position: static;
-        flex-direction: column;
-        align-items: flex-end;
+        flex-direction: row;
+        align-items: center;
         gap: 10px;
-        margin-top: 10px;
+        margin-top: 0;
+        flex-shrink: 1;
     }
     
     .view-mode-selector,
@@ -1433,10 +1466,18 @@ body::before {
         grid-template-columns: 1fr;
     }
     
+    /* 保持相机/镜头标签按钮自适应宽度，不强制放大 */
     .filter-btn {
-        display: block;
-        margin: 5px auto;
-        width: 80%;
+        display: inline-flex;
+        margin: 4px 6px 4px 0;
+        width: auto;
+        padding: 6px 10px;
+    }
+    #tagControls .filter-btn {
+        display: inline-flex;
+        margin: 0;
+        width: auto;
+        padding: 6px 10px;
     }
     
     /* 超小屏幕灯箱优化 */
@@ -1473,37 +1514,16 @@ body::before {
     /* 紧凑型标签条，单行横向滚动，减小间距与字号 */
     .gallery-controls#tagControls { 
         margin-bottom: 16px;
-        margin-left: -20px;
-        margin-right: -20px;
-        padding-left: 20px;
-        padding-right: 20px;
-        width: calc(100% + 40px);
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        white-space: nowrap;
-        gap: 0;
-        line-height: 1.4;
-        justify-content: flex-start;
-        scroll-padding-left: 0;
-        scroll-padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+        overflow-x: visible;
+        overflow-y: visible;
         box-sizing: border-box;
     }
     
-    /* 确保可以滚动到最左边 */
-    #tagControls > *:first-child {
-        margin-left: 0;
-    }
-    #tagControls .tag-bracket { display: none; }
-    #tagControls .tag-sep { margin: 0 6px; color: #b0b4bb; }
-    #tagControls .filter-btn {
-        padding: 4px 8px;
-        font-size: 0.85rem;
-        background: transparent;
-    }
-    #tagControls .filter-btn.active {
-        text-underline-offset: 3px;
-        background: transparent;
-    }
 }

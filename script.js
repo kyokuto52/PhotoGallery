@@ -41,7 +41,7 @@
 
 // 浏览模式配置
 let currentViewMode = 'full';
-let currentSortMode = 'time-asc'; // 默认时间正向排序
+let currentSortMode = 'time-desc'; // 默认由新到旧排序
 
 // 浏览模式选择器初始化
 function initializeViewModeSelector() {
@@ -175,6 +175,7 @@ document.addEventListener("DOMContentLoaded", function() {
     initializeSortSelector();
     changeViewMode('full');
 });
+
 
 // 渲染照片
 function renderPhotos() {
@@ -525,7 +526,7 @@ function initializeSortSelector() {
     });
     
     // 设置初始按钮文字
-    const initialText = currentSortMode === 'time-asc' ? '时间正向' : '时间反向';
+    const initialText = currentSortMode === 'time-desc' ? '由新到旧' : '由旧到新';
     const btnText = sortBtn.querySelector('.btn-text');
     if (btnText) {
         btnText.textContent = initialText;

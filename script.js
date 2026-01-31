@@ -399,17 +399,19 @@ function getPhotoTimestamp(photo) {
     // 优先使用EXIF中的原始拍摄时间
     if (photo.exif && photo.exif['原始拍摄时间']) {
         const timeStr = photo.exif['原始拍摄时间'];
-        // 格式: "2022:10:23 17:15:54"
-        const date = new Date(timeStr.replace(/:/g, '-').replace(' ', 'T'));
+        // 只替换年月日之间的冒号，时分秒的冒号保留
+        const fixed = timeStr.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3').replace(' ', 'T');
+        const date = new Date(fixed);
         if (!isNaN(date.getTime())) {
             return date.getTime();
         }
     }
-    
+
     // 其次使用EXIF中的拍摄时间
     if (photo.exif && photo.exif['拍摄时间']) {
         const timeStr = photo.exif['拍摄时间'];
-        const date = new Date(timeStr.replace(/:/g, '-').replace(' ', 'T'));
+        const fixed = timeStr.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3').replace(' ', 'T');
+        const date = new Date(fixed);
         if (!isNaN(date.getTime())) {
             return date.getTime();
         }

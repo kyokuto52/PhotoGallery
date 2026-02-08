@@ -322,6 +322,29 @@ class AdminHandler(BaseHTTPRequestHandler):
                     # 保存原图到data文件夹
                     with open(file_path, 'wb') as f:
                         f.write(image_file.file.read())
+
+                    # If uploaded file is HEIC/HEIF, try to convert to JPG for browser compatibility
+                    lower_name = file_name.lower()
+                    if lower_name.endswith('.heic') or lower_name.endswith('.heif'):
+                        try:
+                            # produce jpg at same base name
+                            jpg_name = os.path.splitext(file_name)[0] + '.jpg'
+                            jpg_path = os.path.join('data', jpg_name)
+                            # open via Pillow (pillow_heif registers opener if available)
+                            with Image.open(file_path) as him:
+                                if him.mode in ('RGBA', 'LA', 'P'):
+                                    him = him.convert('RGB')
+                                him.save(jpg_path, 'JPEG', quality=95, optimize=True)
+                            # set file_path to generated jpg and remove original HEIC
+                            try:
+                                os.remove(file_path)
+                            except Exception:
+                                pass
+                            file_name = jpg_name
+                            file_path = jpg_path
+                            thumbnail_path = os.path.join('thumbnails', file_name)
+                        except Exception as e:
+                            print('HEIC->JPG conversion failed:', e)
                     
                     # 生成缩略图
                     thumbnail_generated = False
@@ -332,17 +355,13 @@ class AdminHandler(BaseHTTPRequestHandler):
                                 # 转换为RGB模式（处理RGBA等格式）
                                 if img.mode in ('RGBA', 'LA', 'P'):
                                     img = img.convert('RGB')
-                                
                                 # 计算缩略图尺寸（保持宽高比）
                                 max_width = 400
                                 max_height = 300
-                                
                                 # 获取原始尺寸
                                 width, height = img.size
-                                
                                 # 计算缩放比例
                                 ratio = min(max_width / width, max_height / height)
-                                
                                 # 如果图片已经很小，不需要缩放
                                 if ratio >= 1:
                                     # 直接复制原图作为缩略图
@@ -351,16 +370,16 @@ class AdminHandler(BaseHTTPRequestHandler):
                                     # 计算新尺寸
                                     new_width = int(width * ratio)
                                     new_height = int(height * ratio)
-                                    
                                     # 生成缩略图
                                     thumbnail = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-                                    
                                     # 保存缩略图，优化质量
+                                    # ensure thumbnail filename ends with .jpg for browser
+                                    tn_root, tn_ext = os.path.splitext(thumbnail_path)
+                                    if not tn_ext.lower().endswith('.jpg'):
+                                        thumbnail_path = tn_root + '.jpg'
                                     thumbnail.save(thumbnail_path, 'JPEG', quality=85, optimize=True)
-                                
                                 thumbnail_generated = True
                                 print(f"✅ 缩略图已生成：{thumbnail_path}")
-                                
                         except Exception as e:
                             print(f"⚠️  生成缩略图时出错：{str(e)}")
                             # 如果生成缩略图失败，复制原图作为缩略图
@@ -371,10 +390,18 @@ class AdminHandler(BaseHTTPRequestHandler):
                         shutil.copy2(file_path, thumbnail_path)
                         thumbnail_generated = True
                     
+                    # 自动提取EXIF
+                    exif_data = None
+                    try:
+                        exif_data = self.extract_exif_from_image(file_path)
+                    except Exception as e:
+                        print(f"自动提取EXIF失败: {e}")
+
                     result = {
                         'success': True,
                         'filePath': f'data/{file_name}',
-                        'thumbnailPath': f'thumbnails/{file_name}' if thumbnail_generated else None,
+                        'thumbnailPath': f'thumbnails/{os.path.basename(thumbnail_path)}' if thumbnail_generated else None,
+                        'exif': exif_data,
                         'message': f'图片已保存到：{file_path}' + (f'，缩略图已生成：{thumbnail_path}' if thumbnail_generated else '，缩略图生成失败')
                     }
                     

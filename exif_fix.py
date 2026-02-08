@@ -128,6 +128,55 @@ def extract_exif(path: Path):
                     return out if out else None
             except Exception:
                 pass
+
+            # Fall back: try extracting metadata from XMP if present (newer cameras/phones)
+            try:
+                xmp_raw = img.info.get('xmp')
+                if xmp_raw:
+                    import xml.etree.ElementTree as ET
+                    if isinstance(xmp_raw, bytes):
+                        xmp_text = xmp_raw.decode('utf-8', errors='ignore')
+                    else:
+                        xmp_text = str(xmp_raw)
+                    try:
+                        root = ET.fromstring(xmp_text)
+                        # walk elements and pick common tags
+                        gps = {}
+                        for elem in root.iter():
+                            tag = elem.tag
+                            # strip namespace
+                            if '}' in tag:
+                                local = tag.split('}', 1)[1]
+                            else:
+                                local = tag
+                            txt = elem.text
+                            if not txt:
+                                continue
+                            if local in ('Make', 'CameraMake'):
+                                out['相机品牌'] = txt
+                            elif local in ('Model', 'CameraModel'):
+                                out['相机型号'] = txt
+                            elif local in ('DateTimeOriginal', 'CreateDate', 'DateCreated'):
+                                out['原始拍摄时间'] = txt
+                            elif local in ('LensModel', 'Lens'):
+                                out['镜头型号'] = txt
+                            # GPS fields (collect, formatting left simple)
+                            elif local in ('GPSLatitude', 'GPSLatitudeRef'):
+                                gps['lat'] = txt
+                            elif local in ('GPSLongitude', 'GPSLongitudeRef'):
+                                gps['lon'] = txt
+                        if gps:
+                            try:
+                                out['GPS'] = ','.join(f"{k}:{v}" for k, v in gps.items())
+                            except Exception:
+                                out['GPS'] = str(gps)
+                        return out if out else None
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+            except Exception:
+                pass
             return None
     except Exception as e:
         print('EXIF read error for', path, e)
